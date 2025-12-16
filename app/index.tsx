@@ -1,127 +1,164 @@
+import { useCallback, useRef, useState } from 'react';
+import { Alert, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WebView } from 'react-native-webview';
+import { WebView, WebViewNavigation, WebViewMessageEvent } from 'react-native-webview';
+import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 
-// TODO: 여기를 실제 Next.js 프로젝트의 URL로 변경하세요.
-// 로컬 테스트 시 (Android): 'http://10.0.2.2:3000'
-// 로컬 테스트 시 (iOS): 'http://localhost:3000'
-const getTargetUrl = () => {
-  const originalUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL || 'https://www.google.com';
-  
-  // 개발 환경 편의성: 안드로이드 에뮬레이터에서 localhost 접속 시 10.0.2.2로 자동 변환
-  if (__DEV__ && Platform.OS === 'android' && originalUrl.includes('localhost')) {
-    return originalUrl.replace('localhost', '10.0.2.2');
-  }
-  return originalUrl;
-};
+import { LoadingIndicator } from '@/components/loading-indicator';
+import { useSmartBackHandler } from '@/hooks/use-smart-back-handler';
+import {
+  CHROME_USER_AGENT,
+  FALLBACK_URL,
+  DEFAULT_ROUTE_INFO,
+  getInitialUrl,
+  isTabRoute,
+  extractPath,
+  toEmulatorUrl,
+  hasLocalhost,
+  type RouteInfo,
+  type WebToAppMessage,
+} from '@/lib/webview';
+
+// ============================================================================
+// Main Screen Component
+// ============================================================================
 
 export default function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
-  const [canGoBack, setCanGoBack] = useState(false);
-  // URL을 상태로 관리하여 에러 발생 시 변경 가능하도록 함
-  const [currentUrl, setCurrentUrl] = useState(getTargetUrl());
+  const [url, setUrl] = useState(getInitialUrl);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
 
-  const [isLoading, setIsLoading] = useState(true);
+  useSmartBackHandler({ webViewRef, routeInfo });
 
-  // 안드로이드 하드웨어 뒤로가기 버튼 핸들링
-  const handleBackPress = useCallback(() => {
-    if (Platform.OS === 'android' && webViewRef.current && canGoBack) {
-      webViewRef.current.goBack();
-      return true; // 이벤트를 소비함 (앱 종료 방지)
+  // ─────────────────────────────────────────────────────────────────────────
+  // Message Handlers
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const handleMessage = useCallback((event: WebViewMessageEvent) => {
+    try {
+      const message: WebToAppMessage = JSON.parse(event.nativeEvent.data);
+
+      if (message.type === 'ROUTE_INFO') {
+        setRouteInfo(message.payload);
+      }
+    } catch {
+      // Ignore parse errors
     }
-    return false; // 기본 동작 수행 (앱 종료)
-  }, [canGoBack]);
+  }, []);
 
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-      return () => {
-        backHandler.remove();
-      };
+  // ─────────────────────────────────────────────────────────────────────────
+  // Navigation Handlers
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const handleLoadRequest = useCallback(
+    (request: ShouldStartLoadRequest): boolean => {
+      const { url: requestUrl } = request;
+
+      // Block intent:// scheme
+      if (requestUrl.startsWith('intent://')) return false;
+
+      // Convert localhost to emulator IP
+      if (hasLocalhost(requestUrl)) {
+        setUrl(toEmulatorUrl(requestUrl));
+        return false;
+      }
+
+      return true;
+    },
+    []
+  );
+
+  const handleNavigation = useCallback((navState: WebViewNavigation) => {
+    const path = extractPath(navState.url);
+    const onTabRoute = isTabRoute(path);
+    const isHome = path === '/';
+
+    setRouteInfo((prev) => ({
+      ...prev,
+      path,
+      isTabRoute: onTabRoute,
+      isHome,
+      // 홈에서는 뒤로가기 불가 (앱 종료로 이어짐), 그 외에는 WebView 상태 따름
+      canGoBack: navState.canGoBack && !isHome,
+    }));
+
+    if (hasLocalhost(navState.url)) {
+      setUrl(toEmulatorUrl(navState.url));
     }
-  }, [handleBackPress]);
+  }, []);
 
-  // 웹뷰 로드 에러 핸들러
-  const handleError = () => {
-    setIsLoading(false); // 로딩 해제
-    Alert.alert(
-      '연결 실패',
-      '서버에 연결할 수 없습니다. 개발 서버가 켜져 있는지 확인해주세요.\n임시로 구글로 이동합니다.',
-      [
-        {
-          text: '확인',
-          onPress: () => setCurrentUrl('https://www.google.com'),
-        },
-        {
-          text: '재시도',
-          onPress: () => webViewRef.current?.reload(),
-          style: 'cancel',
-        }
-      ]
-    );
-  };
+  // ─────────────────────────────────────────────────────────────────────────
+  // Error Handlers
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // 로딩 상태 변경 핸들러
-  const handleLoadStart = () => setIsLoading(true);
-  const handleLoadEnd = () => setIsLoading(false);
+  const showConnectionError = useCallback(() => {
+    Alert.alert('연결 실패', '서버에 연결할 수 없습니다.', [
+      { text: '홈으로', onPress: () => setUrl(FALLBACK_URL) },
+      { text: '재시도', onPress: () => webViewRef.current?.reload(), style: 'cancel' },
+    ]);
+  }, []);
+
+  const handleHttpError = useCallback(
+    (event: { nativeEvent: { url?: string } }) => {
+      if (!event.nativeEvent.url?.includes('localhost')) {
+        showConnectionError();
+      }
+    },
+    [showConnectionError]
+  );
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar style="auto" />
       <WebView
         ref={webViewRef}
-        source={{ uri: currentUrl }}
+        source={{ uri: url }}
         style={styles.webview}
-        // 웹뷰 네비게이션 상태 변경 시 호출
-        onNavigationStateChange={(navState) => {
-          setCanGoBack(navState.canGoBack);
-        }}
-        // 로드 시작/종료 핸들링
-        onLoadStart={handleLoadStart}
-        onLoadEnd={handleLoadEnd}
-        // 에러 핸들링
-        onError={handleError}
-        onHttpError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.warn('WebView received error status code: ', nativeEvent.statusCode);
-          handleError();
-        }}
-        // 자바스크립트 활성화
-        javaScriptEnabled={true}
-        // DOM 스토리지 활성화 (로그인 세션 유지 등)
-        domStorageEnabled={true}
-        // 캐시 활성화
-        cacheEnabled={true}
-        // 로딩 중 표시할 컴포넌트 (커스텀 처리하므로 startInLoadingState 제거 가능하나 유지)
-        startInLoadingState={true}
-        renderLoading={() => (
-           isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          ) : null
-        )}
-        // 뷰포트 확대/축소 비활성화 (모바일 전용 웹앱인 경우)
-        scalesPageToFit={true}
+        userAgent={CHROME_USER_AGENT}
+        // Scroll behavior
+        bounces={false}
+        overScrollMode="never"
+        // OAuth & Cookie
+        originWhitelist={['*']}
+        thirdPartyCookiesEnabled
+        sharedCookiesEnabled
+        mixedContentMode="compatibility"
+        setSupportMultipleWindows={false}
+        // Core features
+        javaScriptEnabled
+        domStorageEnabled
+        cacheEnabled
+        mediaPlaybackRequiresUserAction={false}
+        scalesPageToFit
+        // Loading
+        startInLoadingState
+        renderLoading={LoadingIndicator}
+        // Events
+        onMessage={handleMessage}
+        onShouldStartLoadWithRequest={handleLoadRequest}
+        onNavigationStateChange={handleNavigation}
+        onError={showConnectionError}
+        onHttpError={handleHttpError}
       />
     </SafeAreaView>
   );
 }
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff', // 상태바 배경색과 일치시키는 것이 좋음
+    backgroundColor: '#fff',
   },
   webview: {
     flex: 1,
-  },
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
   },
 });
