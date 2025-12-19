@@ -10,19 +10,38 @@ Expo에서는 **`EXPO_PUBLIC_`** 접두사가 붙은 환경변수만 클라이�
 
 ## 방법 1: .env 파일 사용 (로컬 개발)
 
+### 환경변수 파일 우선순위
+
+Expo는 다음 순서로 환경변수 파일을 로드합니다 (높은 우선순위부터):
+
+1. **`.env.local`** (최우선) - 로컬 개발용, Git에 커밋되지 않음
+2. **`.env.development.local`** / **`.env.production.local`** - 환경별 로컬 설정
+3. **`.env.development`** / **`.env.production`** - 환경별 설정
+4. **`.env`** (기본값) - 공통 설정
+
 ### 1. .env 파일 생성
 
 ```bash
 # .env.example을 복사하여 .env 파일 생성
 cp .env.example .env
+
+# 또는 로컬 전용 설정 (최우선)
+cp .env.example .env.local
 ```
 
 ### 2. .env 파일에 값 설정
 
+**`.env` (기본값)**
 ```env
 EXPO_PUBLIC_WEBVIEW_URL=http://localhost:3000
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+**`.env.local` (로컬 전용, 최우선)**
+```env
+# .env의 값을 덮어씁니다
+EXPO_PUBLIC_WEBVIEW_URL=http://192.168.0.100:3000
 ```
 
 ### 3. 코드에서 사용
