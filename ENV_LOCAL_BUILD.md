@@ -11,10 +11,23 @@
 
 ## 로컬 빌드 환경변수 설정 방법
 
-### 1. .env 파일 생성/수정
+### 1. 환경변수 파일 생성/수정
 
+**우선순위 (높은 순서):**
+1. `.env.local` (최우선) - 로컬 전용, Git에 커밋되지 않음
+2. `.env.development.local` / `.env.production.local`
+3. `.env.development` / `.env.production`
+4. `.env` (기본값)
+
+**권장: `.env.local` 사용**
 ```bash
-# 프로젝트 루트에 .env 파일 생성
+# 프로젝트 루트에 .env.local 파일 생성 (최우선)
+EXPO_PUBLIC_WEBVIEW_URL=http://localhost:3000
+```
+
+또는 기본 `.env` 파일:
+```bash
+# .env 파일 생성
 EXPO_PUBLIC_WEBVIEW_URL=http://localhost:3000
 ```
 
