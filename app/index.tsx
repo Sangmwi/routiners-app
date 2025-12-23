@@ -128,21 +128,41 @@ export default function WebViewScreen() {
   // Error Handlers
   // ─────────────────────────────────────────────────────────────────────────
 
-  const showConnectionError = useCallback(() => {
-    Alert.alert('연결 실패', '서버에 연결할 수 없습니다.', [
-      { text: '홈으로', onPress: () => setUrl(FALLBACK_URL) },
-      { text: '재시도', onPress: () => webViewRef.current?.reload(), style: 'cancel' },
-      { text: '뒤로가기', onPress: () => webViewRef.current?.goBack() },
-    ]);
+  const handleWebViewError = useCallback((syntheticEvent: { nativeEvent: { description?: string; code?: number; url?: string } }) => {
+    const { description, code, url: errorUrl } = syntheticEvent.nativeEvent;
+
+    console.log('[WebView] 🔴 onError triggered:', { description, code, errorUrl });
+
+    // 디버깅용 상세 Alert
+    Alert.alert(
+      '연결 실패',
+      `서버에 연결할 수 없습니다.\n\n[DEBUG]\nURL: ${errorUrl}\nCode: ${code}\nDesc: ${description}`,
+      [
+        { text: '홈으로', onPress: () => setUrl(FALLBACK_URL) },
+        { text: '재시도', onPress: () => webViewRef.current?.reload(), style: 'cancel' },
+        { text: '뒤로가기', onPress: () => webViewRef.current?.goBack() },
+      ]
+    );
   }, []);
 
   const handleHttpError = useCallback(
-    (event: { nativeEvent: { url?: string } }) => {
-      if (!event.nativeEvent.url?.includes('localhost')) {
-        showConnectionError();
+    (event: { nativeEvent: { url?: string; statusCode?: number; description?: string } }) => {
+      const { url: errorUrl, statusCode, description } = event.nativeEvent;
+
+      console.log('[WebView] 🟠 onHttpError:', { errorUrl, statusCode, description });
+
+      if (!errorUrl?.includes('localhost')) {
+        Alert.alert(
+          'HTTP 에러',
+          `[DEBUG]\nURL: ${errorUrl}\nStatus: ${statusCode}\nDesc: ${description}`,
+          [
+            { text: '확인' },
+            { text: '재시도', onPress: () => webViewRef.current?.reload() },
+          ]
+        );
       }
     },
-    [showConnectionError]
+    []
   );
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -181,7 +201,7 @@ export default function WebViewScreen() {
         onMessage={handleMessage}
         onShouldStartLoadWithRequest={handleLoadRequest}
         onNavigationStateChange={handleNavigation}
-        onError={showConnectionError}
+        onError={handleWebViewError}
         onHttpError={handleHttpError}
       />
     </SafeAreaView>
