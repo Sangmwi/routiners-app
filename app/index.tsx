@@ -158,7 +158,7 @@ export default function WebViewScreen() {
         style={styles.webview}
         userAgent={CHROME_USER_AGENT}
         // Debug
-        webviewDebuggingEnabled={__DEV__}
+        webviewDebuggingEnabled={true}
         // Scroll behavior
         bounces={false}
         overScrollMode="never"
