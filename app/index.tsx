@@ -85,14 +85,20 @@ export default function WebViewScreen() {
     }
   }, [signInWithGoogle]);
 
-  // 로그인 성공 시 홈으로 이동 (로그인 페이지에서 세션 생성된 경우)
+  // 세션 변경 시 WebView에 토큰 전달 및 홈으로 이동
   useEffect(() => {
-    if (session && routeInfo.path === '/login') {
-      console.log('[WebView] Session detected on login page, redirecting to home');
-      setUrl(getInitialUrl());
-      setRouteInfo(DEFAULT_ROUTE_INFO);
+    if (session) {
+      // 토큰 전달
+      syncTokenToWebView();
+
+      // 로그인 페이지에 있으면 홈으로 이동
+      if (routeInfo.path === '/login' || url.includes('/login')) {
+        console.log('[WebView] Session detected, redirecting to home');
+        setUrl(getInitialUrl());
+        setRouteInfo(DEFAULT_ROUTE_INFO);
+      }
     }
-  }, [session, routeInfo.path]);
+  }, [session, syncTokenToWebView]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handlers
