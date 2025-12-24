@@ -49,7 +49,13 @@ export default function WebViewScreen() {
   const [isUrlInitialized, setIsUrlInitialized] = useState(false);
 
   // 네이티브 인증 상태 관리 (WebView에 토큰 자동 전달)
-  const { session, isReady, signOut, signInWithGoogle, syncTokenToWebView } = useAuth(webViewRef);
+  const {
+    session,
+    isReady,
+    signOut,
+    signInWithGoogle,
+    handleWebMessage,
+  } = useAuth(webViewRef);
 
   // 세션 로드 완료 후 초기 URL 결정
   const [url, setUrl] = useState(getInitialUrl);
@@ -114,16 +120,13 @@ export default function WebViewScreen() {
     }
   }, [signInWithGoogle]);
 
-  // 세션 변경 감지 (로그인/로그아웃)
+  // 세션 변경 감지 → URL 네비게이션 처리
+  // (토큰 전달은 useAuth의 onAuthStateChange에서 자동 처리)
   useEffect(() => {
     if (!isReady || !isUrlInitialized) return;
 
     if (session) {
-      // 로그인됨: WebView에 토큰 전달
-      console.log('[WebView] Session changed: logged in');
-      syncTokenToWebView();
-
-      // 현재 로그인 페이지면 홈으로 이동
+      // 로그인됨: 로그인 페이지면 홈으로 이동
       if (routeInfo.path === '/login' || url.includes('/login')) {
         console.log('[WebView] Redirecting to home after login');
         setUrl(getInitialUrl());
@@ -131,13 +134,13 @@ export default function WebViewScreen() {
       }
     } else {
       // 로그아웃됨: 로그인 페이지로 이동
-      console.log('[WebView] Session changed: logged out');
+      console.log('[WebView] Session cleared, redirecting to login');
       if (!url.includes('/login')) {
         setUrl(getLoginUrl());
         setRouteInfo({ ...DEFAULT_ROUTE_INFO, path: '/login', isHome: false });
       }
     }
-  }, [session, isReady, isUrlInitialized]);
+  }, [session, isReady, isUrlInitialized, routeInfo.path, url]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handlers
@@ -157,11 +160,17 @@ export default function WebViewScreen() {
         case 'REQUEST_LOGIN':
           handleNativeLogin();
           break;
+        // 인증 관련 메시지는 useAuth에서 처리
+        case 'WEB_READY':
+        case 'TOKEN_RECEIVED':
+        case 'REQUEST_TOKEN_REFRESH':
+          handleWebMessage(message);
+          break;
       }
     } catch {
       // Ignore parse errors
     }
-  }, [handleLogout, handleNativeLogin]);
+  }, [handleLogout, handleNativeLogin, handleWebMessage]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Navigation Handlers
@@ -293,7 +302,7 @@ export default function WebViewScreen() {
         onNavigationStateChange={handleNavigation}
         onError={handleWebViewError}
         onHttpError={handleHttpError}
-        onLoadEnd={syncTokenToWebView} // WebView 로드 완료 시 토큰 동기화
+        // 토큰 동기화는 웹에서 WEB_READY 신호를 보내면 처리됨 (handleWebMessage)
       />
     </SafeAreaView>
   );
