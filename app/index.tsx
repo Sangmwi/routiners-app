@@ -162,8 +162,9 @@ export default function WebViewScreen() {
           break;
         // 인증 관련 메시지는 useAuth에서 처리
         case 'WEB_READY':
-        case 'TOKEN_RECEIVED':
-        case 'REQUEST_TOKEN_REFRESH':
+        case 'SESSION_SET':
+        case 'REQUEST_SESSION_REFRESH':
+        case 'SESSION_EXPIRED':
           handleWebMessage(message);
           break;
       }
