@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, StyleSheet, useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, WebViewNavigation, WebViewMessageEvent } from 'react-native-webview';
@@ -27,13 +27,42 @@ import {
 // Main Screen Component
 // ============================================================================
 
+// 웹 테마와 일치하는 색상
+const THEME = {
+  light: {
+    background: '#f8faf8', // 웹 라이트모드 배경
+    statusBar: 'dark' as const,
+  },
+  dark: {
+    background: '#0f172a', // 웹 다크모드 배경 (slate-900)
+    statusBar: 'light' as const,
+  },
+};
+
 export default function WebViewScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = isDark ? THEME.dark : THEME.light;
+
   const webViewRef = useRef<WebView>(null);
-  const [url, setUrl] = useState(getInitialUrl);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
+  const [isUrlInitialized, setIsUrlInitialized] = useState(false);
 
   // 네이티브 인증 상태 관리 (WebView에 토큰 자동 전달)
-  const { session, signOut, signInWithGoogle, syncTokenToWebView } = useAuth(webViewRef);
+  const { session, isReady, signOut, signInWithGoogle, syncTokenToWebView } = useAuth(webViewRef);
+
+  // 세션 로드 완료 후 초기 URL 결정
+  const [url, setUrl] = useState(getInitialUrl);
+
+  useEffect(() => {
+    if (isReady && !isUrlInitialized) {
+      setIsUrlInitialized(true);
+      // 세션이 있으면 홈, 없으면 로그인
+      const startUrl = session ? getInitialUrl() : getLoginUrl();
+      console.log('[WebView] Session ready, starting with:', session ? 'home' : 'login');
+      setUrl(startUrl);
+    }
+  }, [isReady, session, isUrlInitialized]);
 
   useSmartBackHandler({ webViewRef, routeInfo });
 
@@ -85,20 +114,30 @@ export default function WebViewScreen() {
     }
   }, [signInWithGoogle]);
 
-  // 세션 변경 시 WebView에 토큰 전달 및 홈으로 이동
+  // 세션 변경 감지 (로그인/로그아웃)
   useEffect(() => {
+    if (!isReady || !isUrlInitialized) return;
+
     if (session) {
-      // 토큰 전달
+      // 로그인됨: WebView에 토큰 전달
+      console.log('[WebView] Session changed: logged in');
       syncTokenToWebView();
 
-      // 로그인 페이지에 있으면 홈으로 이동
+      // 현재 로그인 페이지면 홈으로 이동
       if (routeInfo.path === '/login' || url.includes('/login')) {
-        console.log('[WebView] Session detected, redirecting to home');
+        console.log('[WebView] Redirecting to home after login');
         setUrl(getInitialUrl());
         setRouteInfo(DEFAULT_ROUTE_INFO);
       }
+    } else {
+      // 로그아웃됨: 로그인 페이지로 이동
+      console.log('[WebView] Session changed: logged out');
+      if (!url.includes('/login')) {
+        setUrl(getLoginUrl());
+        setRouteInfo({ ...DEFAULT_ROUTE_INFO, path: '/login', isHome: false });
+      }
     }
-  }, [session, syncTokenToWebView]);
+  }, [session, isReady, isUrlInitialized]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handlers
@@ -210,9 +249,19 @@ export default function WebViewScreen() {
   // Render
   // ─────────────────────────────────────────────────────────────────────────
 
+  // 세션 로드 전에는 로딩 화면 표시
+  if (!isReady) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
+        <StatusBar style={theme.statusBar} />
+        <LoadingIndicator />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar style="auto" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
+      <StatusBar style={theme.statusBar} />
       <WebView
         ref={webViewRef}
         source={{ uri: url }}
@@ -257,7 +306,6 @@ export default function WebViewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   webview: {
     flex: 1,
