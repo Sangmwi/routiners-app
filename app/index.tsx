@@ -8,6 +8,7 @@ import CookieManager from '@react-native-cookies/cookies';
 
 import { LoadingIndicator } from '@/components/loading-indicator';
 import { useSmartBackHandler } from '@/hooks/use-smart-back-handler';
+import { useAuth } from '@/hooks/use-auth';
 import {
   CHROME_USER_AGENT,
   FALLBACK_URL,
@@ -31,6 +32,9 @@ export default function WebViewScreen() {
   const [url, setUrl] = useState(getInitialUrl);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
 
+  // 네이티브 인증 상태 관리 (WebView에 토큰 자동 전달)
+  const { signOut, syncTokenToWebView } = useAuth(webViewRef);
+
   useSmartBackHandler({ webViewRef, routeInfo });
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -38,29 +42,29 @@ export default function WebViewScreen() {
   // ─────────────────────────────────────────────────────────────────────────
 
   const handleLogout = useCallback(async () => {
-    console.log('[WebView] Logout received, clearing session cookies...');
-    
+    console.log('[WebView] Logout received, clearing session...');
+
+    // 1. 네이티브 Supabase 세션 로그아웃 (SecureStore 토큰 삭제)
+    await signOut();
+
+    // 2. 쿠키 삭제 시도 (레거시 호환)
     try {
-      // 웹앱 도메인의 쿠키만 삭제 (iOS만 지원)
-      // Android는 서버 세션이 무효화되므로 쿠키가 남아있어도 인증 실패함
       const webUrl = getInitialUrl();
       const cookies = await CookieManager.get(webUrl);
-      
+
       for (const cookieName of Object.keys(cookies)) {
         await CookieManager.clearByName(webUrl, cookieName);
       }
     } catch {
-      // Android: clearByName 미지원 - 쿠키 삭제 생략
-      // 서버에서 세션이 무효화되었으므로 쿠키가 있어도 인증 실패
       console.log('[WebView] Cookie clear skipped (Android)');
     }
-    
-    // 로그인 페이지로 이동
+
+    // 3. 로그인 페이지로 이동
     setUrl(getLoginUrl());
     setRouteInfo({ ...DEFAULT_ROUTE_INFO, path: '/login', isHome: false });
-    
+
     console.log('[WebView] Redirecting to login...');
-  }, []);
+  }, [signOut]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handlers
@@ -203,6 +207,7 @@ export default function WebViewScreen() {
         onNavigationStateChange={handleNavigation}
         onError={handleWebViewError}
         onHttpError={handleHttpError}
+        onLoadEnd={syncTokenToWebView} // WebView 로드 완료 시 토큰 동기화
       />
     </SafeAreaView>
   );
