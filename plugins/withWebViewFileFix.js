@@ -75,10 +75,8 @@ public class FileUtils {
             File cacheDir = getCacheDir(context);
             cleanupOldFiles(cacheDir);
 
-            String fileName = getFileName(context, contentUri);
-            if (fileName == null) {
-                fileName = generateFileName(context, contentUri);
-            }
+            // 항상 고유한 파일명 생성 (동일 파일 중복 선택 시 충돌 방지)
+            String fileName = generateUniqueFileName(context, contentUri);
             File cacheFile = new File(cacheDir, fileName);
 
             // 파일 복사
@@ -132,9 +130,9 @@ public class FileUtils {
     }
 
     /**
-     * content:// URI에서 파일명을 추출합니다.
+     * content:// URI에서 원본 파일명을 추출합니다.
      */
-    private static String getFileName(Context context, Uri uri) {
+    private static String getOriginalFileName(Context context, Uri uri) {
         String fileName = null;
 
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
@@ -158,15 +156,24 @@ public class FileUtils {
     }
 
     /**
-     * 파일명을 생성합니다.
+     * 고유한 파일명을 생성합니다.
+     * 동일 파일을 여러 번 선택해도 충돌하지 않도록 항상 UUID 접두사를 붙입니다.
      */
-    private static String generateFileName(Context context, Uri uri) {
+    private static String generateUniqueFileName(Context context, Uri uri) {
+        String uniquePrefix = UUID.randomUUID().toString().substring(0, 8) + "_";
+        String originalName = getOriginalFileName(context, uri);
+
+        if (originalName != null) {
+            return uniquePrefix + originalName;
+        }
+
+        // 원본 파일명을 가져올 수 없으면 확장자만 추출하여 생성
         String mimeType = context.getContentResolver().getType(uri);
         String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
         if (extension == null) {
             extension = "jpg";
         }
-        return "upload_" + UUID.randomUUID().toString() + "." + extension;
+        return uniquePrefix + "upload." + extension;
     }
 
     /**
