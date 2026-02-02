@@ -51,6 +51,9 @@ function configureGoogleSignIn() {
 
 const LOG_PREFIX = '[useAuth]';
 
+/** SESSION_SET 응답 대기 타임아웃 (5초) */
+const SESSION_SET_TIMEOUT = 5000;
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -135,12 +138,14 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
           sessionSetResolverRef.current(false);
         }
 
-        // 타임아웃 설정 (15초 - 느린 네트워크 대응)
+        // 타임아웃 설정 (5초)
         const timeoutId = setTimeout(() => {
           sessionSetResolverRef.current = null;
-          console.log(`${LOG_PREFIX} Session set timeout - web may have navigated already`);
-          resolve(false);
-        }, 15000);
+          console.log(`${LOG_PREFIX} Session set timeout (${SESSION_SET_TIMEOUT}ms)`);
+          // 타임아웃 시에도 true로 resolve (낙관적 처리)
+          // 웹이 이미 리다이렉트했을 수 있으므로 흐름 계속 진행
+          resolve(true);
+        }, SESSION_SET_TIMEOUT);
 
         // resolver 저장
         sessionSetResolverRef.current = (success: boolean) => {

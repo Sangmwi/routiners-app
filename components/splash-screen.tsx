@@ -18,7 +18,9 @@ import { useTheme, COLORS } from '@/lib/theme';
 
 const { width, height } = Dimensions.get('window');
 const LOGO_SIZE = 120;
-const DELAYED_TEXT_MS = 1000;
+// 최적화 후 로딩이 빨라지므로 텍스트 표시 시점 조정
+// 1.5초 이상 걸리는 경우에만 표시 (느린 연결 표시)
+const DELAYED_TEXT_MS = 1500;
 
 // ============================================================================
 // Component
