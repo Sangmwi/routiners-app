@@ -70,4 +70,5 @@ export type WebToAppMessage =
   | { type: 'SESSION_SET'; success: boolean }
   | { type: 'REQUEST_SESSION_REFRESH' }
   | { type: 'SESSION_EXPIRED' }
-  | { type: 'REQUEST_IMAGE_PICKER'; requestId: string; source: ImagePickerSource };
+  | { type: 'REQUEST_IMAGE_PICKER'; requestId: string; source: ImagePickerSource }
+  | { type: 'PAGE_RENDERED' };
