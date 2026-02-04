@@ -92,7 +92,7 @@ export default function WebViewScreen() {
     }
   }, [splashReady]);
 
-  // 스플래시 숨김 조건: ROUTE_INFO 수신 + WebView 로드 완료
+  // 스플래시 숨김 조건: PAGE_RENDERED 수신 + WebView 로드 완료
   useEffect(() => {
     if (canHideSplash && webViewLoaded) {
       setShowSplash(false);
@@ -108,9 +108,13 @@ export default function WebViewScreen() {
       const msg: WebToAppMessage = JSON.parse(event.nativeEvent.data);
 
       switch (msg.type) {
-        // 라우트 → 스플래시 숨김 조건 플래그 설정
+        // 라우트 정보 업데이트
         case 'ROUTE_INFO':
           setRouteInfo(msg.payload);
+          break;
+
+        // 웹 페이지 렌더링 완료 → 스플래시 숨김 허용
+        case 'PAGE_RENDERED':
           setCanHideSplash(true);
           break;
 
