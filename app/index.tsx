@@ -93,17 +93,21 @@ export default function WebViewScreen() {
     }
   }, [splashReady]);
 
-  // 스플래시 숨김: PAGE_RENDERED 수신 + WebView 로드 완료 → 페이드 아웃
+  // 스플래시 숨김: PAGE_RENDERED 수신 + WebView 로드 완료 → 딜레이 후 페이드 아웃
   useEffect(() => {
     if (canHideSplash && webViewLoaded) {
-      // 페이드 아웃 애니메이션 (300ms) - WebView가 렌더링될 시간 확보
-      Animated.timing(splashOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => {
-        setShowSplash(false);
-      });
+      // 50ms 딜레이: WebView 콘텐츠가 확실히 페인트된 후 페이드 시작
+      const timer = setTimeout(() => {
+        Animated.timing(splashOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          setShowSplash(false);
+        });
+      }, 50);
+
+      return () => clearTimeout(timer);
     }
   }, [canHideSplash, webViewLoaded, splashOpacity]);
 
