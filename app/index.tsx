@@ -1,11 +1,10 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
-import { SplashScreen } from '@/components/splash-screen';
+import { SplashScreen, SplashStage } from '@/components/splash-screen';
 import { ErrorModal } from '@/components/error-modal';
 import {
   useSmartBackHandler,
@@ -36,7 +35,10 @@ export default function WebViewScreen() {
 
   const webViewRef = useRef<WebView>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // 스플래시 상태 관리
+  const [splashStage, setSplashStage] = useState<SplashStage>('SESSION_CHECK');
+  const [showSplash, setShowSplash] = useState(true);
 
   // 네이티브 인증 상태 관리 (WebView에 토큰 자동 전달)
   const {
@@ -72,6 +74,13 @@ export default function WebViewScreen() {
     setRouteInfo,
   });
 
+  // 단계 1 → 단계 2: 세션 확인 완료 시
+  useEffect(() => {
+    if (isReady) {
+      setSplashStage('WEBVIEW_LOAD');
+    }
+  }, [isReady]);
+
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handler (switch-case로 타입 내로잉)
   // ─────────────────────────────────────────────────────────────────────────
@@ -81,11 +90,13 @@ export default function WebViewScreen() {
       const msg: WebToAppMessage = JSON.parse(event.nativeEvent.data);
 
       switch (msg.type) {
-        // 라우트 → 실제 목적지 도착 시 스플래시 숨김
+        // 라우트 → 실제 페이지 도착 시 스플래시 숨김
         case 'ROUTE_INFO':
           setRouteInfo(msg.payload);
+          // 홈 또는 실제 콘텐츠 페이지 도착 시 스플래시 숨김
+          // /app-init, /login은 제외 (로그인 페이지는 스플래시 숨기고 보여줘야 함)
           if (msg.payload.path !== '/app-init') {
-            setIsInitialLoad(false);
+            setShowSplash(false);
           }
           break;
 
@@ -105,14 +116,19 @@ export default function WebViewScreen() {
           });
           break;
 
-        // 웹 준비 (스플래시는 ROUTE_INFO에서 처리)
+        // 웹 준비 완료 (쿠키 세션 유효한 경우)
         case 'WEB_READY':
           handleWebMessage(msg);
           break;
 
-        // 세션 (useAuth 위임)
-        case 'SESSION_SET':
+        // 세션 동기화 요청 (쿠키 세션 만료/없음)
         case 'REQUEST_SESSION_REFRESH':
+          setSplashStage('SESSION_SYNC');  // 단계 3: 동기화 중
+          handleWebMessage(msg);
+          break;
+
+        // 세션 관련 (useAuth 위임)
+        case 'SESSION_SET':
         case 'SESSION_EXPIRED':
           handleWebMessage(msg);
           break;
@@ -139,16 +155,6 @@ export default function WebViewScreen() {
   // Render
   // ─────────────────────────────────────────────────────────────────────────
 
-  // 로딩 상태: 세션 체크 중 또는 최초 WebView 로딩 중
-  const showLoading = !isReady || isInitialLoad;
-
-  // 로딩 완료 시 네이티브 스플래시 숨기기
-  useEffect(() => {
-    if (!showLoading) {
-      ExpoSplashScreen.hideAsync();
-    }
-  }, [showLoading]);
-
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.background }]}>
       <StatusBar style={theme.statusBar} />
@@ -161,7 +167,6 @@ export default function WebViewScreen() {
           style={styles.webview}
           userAgent={CHROME_USER_AGENT}
           {...WEBVIEW_BASE_PROPS}
-          // onLoadEnd 대신 WEB_READY 메시지로 스플래시 숨김 (흰 화면 방지)
           onMessage={handleMessage}
           onShouldStartLoadWithRequest={handleLoadRequest}
           onNavigationStateChange={handleNavigation}
@@ -170,10 +175,10 @@ export default function WebViewScreen() {
         />
       )}
 
-      {/* 로딩 오버레이 - WebView 위에 표시 */}
-      {showLoading && (
+      {/* React 스플래시 (단계별 메시지) */}
+      {showSplash && (
         <View style={styles.loadingOverlay}>
-          <SplashScreen />
+          <SplashScreen stage={splashStage} />
         </View>
       )}
 

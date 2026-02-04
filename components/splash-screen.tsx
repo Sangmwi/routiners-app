@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,24 +13,39 @@ import { BlurView } from 'expo-blur';
 import { useTheme, COLORS } from '@/lib/theme';
 
 // ============================================================================
+// Types
+// ============================================================================
+
+export type SplashStage =
+  | 'SESSION_CHECK'   // "로그인 정보 확인 중..."
+  | 'WEBVIEW_LOAD'    // "페이지 로딩 중..."
+  | 'SESSION_SYNC';   // "동기화 중..."
+
+interface SplashScreenProps {
+  stage?: SplashStage;
+}
+
+// ============================================================================
 // Constants
 // ============================================================================
 
 const { width, height } = Dimensions.get('window');
 const LOGO_SIZE = 120;
-// 최적화 후 로딩이 빨라지므로 텍스트 표시 시점 조정
-// 1.5초 이상 걸리는 경우에만 표시 (느린 연결 표시)
-const DELAYED_TEXT_MS = 1500;
+
+const STAGE_MESSAGES: Record<SplashStage, string> = {
+  SESSION_CHECK: '로그인 정보 확인 중...',
+  WEBVIEW_LOAD: '페이지 로딩 중...',
+  SESSION_SYNC: '동기화 중...',
+};
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function SplashScreen() {
+export function SplashScreen({ stage = 'SESSION_CHECK' }: SplashScreenProps) {
   const theme = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const [showDelayedText, setShowDelayedText] = useState(false);
 
   // 테마에 따른 블러 색상 및 tint 설정
   const blurColors = isDark
@@ -48,7 +63,6 @@ export function SplashScreen() {
 
   // Animations
   const logoOpacity = useRef(new Animated.Value(0.7)).current;
-  const textOpacity = useRef(new Animated.Value(0)).current;
 
   // Logo pulse animation
   useEffect(() => {
@@ -69,20 +83,6 @@ export function SplashScreen() {
     pulse.start();
     return () => pulse.stop();
   }, [logoOpacity]);
-
-  // Delayed text fade-in
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowDelayedText(true);
-      Animated.timing(textOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    }, DELAYED_TEXT_MS);
-
-    return () => clearTimeout(timer);
-  }, [textOpacity]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -111,12 +111,10 @@ export function SplashScreen() {
         루티너스
       </Text>
 
-      {/* Delayed loading text */}
-      {showDelayedText && (
-        <Animated.Text style={[styles.loadingText, { color: theme.textMuted, opacity: textOpacity }]}>
-          잠시만 기다려주세요...
-        </Animated.Text>
-      )}
+      {/* 단계별 상태 메시지 */}
+      <Text style={[styles.stageText, { color: theme.textMuted }]}>
+        {STAGE_MESSAGES[stage]}
+      </Text>
     </View>
   );
 }
@@ -172,7 +170,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
   },
-  loadingText: {
+  stageText: {
     position: 'absolute',
     bottom: 100,
     fontSize: 14,

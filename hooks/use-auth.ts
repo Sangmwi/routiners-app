@@ -172,6 +172,7 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
 
   /**
    * 세션을 갱신하고 WebView에 전달합니다.
+   * 실패 시 세션을 정리하고 로그인 페이지로 이동합니다.
    */
   const refreshAndSyncSession = useCallback(async () => {
     console.log(`${LOG_PREFIX} Refreshing session...`);
@@ -179,19 +180,23 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
     try {
       const { data, error } = await supabase.auth.refreshSession();
 
-      if (error) {
-        console.error(`${LOG_PREFIX} Session refresh failed:`, error.message);
+      if (error || !data.session) {
+        console.error(`${LOG_PREFIX} Session refresh failed:`, error?.message);
+        // refresh 실패 → 웹에 CLEAR_SESSION 전송 + 앱 세션 정리
+        clearSessionInWebView();
+        await supabase.auth.signOut();
         return;
       }
 
-      if (data.session) {
-        console.log(`${LOG_PREFIX} Session refreshed, syncing to WebView`);
-        await syncSessionToWebView(data.session);
-      }
+      console.log(`${LOG_PREFIX} Session refreshed, syncing to WebView`);
+      await syncSessionToWebView(data.session);
     } catch (e) {
       console.error(`${LOG_PREFIX} Session refresh error:`, e);
+      // 에러 시 세션 정리
+      clearSessionInWebView();
+      await supabase.auth.signOut();
     }
-  }, [syncSessionToWebView]);
+  }, [syncSessionToWebView, clearSessionInWebView]);
 
   // ──────────────────────────────────────────────────────────────────────────
   // 웹에서 오는 메시지 핸들러
@@ -201,12 +206,9 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
     (message: WebToAppMessage) => {
       switch (message.type) {
         case 'WEB_READY':
-          console.log(`${LOG_PREFIX} Web ready signal received`);
+          // 웹이 쿠키 세션 유효 확인 후 전송 → 세션 전송 불필요
+          console.log(`${LOG_PREFIX} Web ready (cookie session valid)`);
           webReadyRef.current = true;
-          // 웹이 준비되면 현재 세션 전달
-          if (session) {
-            syncSessionToWebView(session);
-          }
           break;
 
         case 'SESSION_SET':
@@ -223,7 +225,9 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
           break;
 
         case 'REQUEST_SESSION_REFRESH':
+          // 웹 쿠키 세션 만료/없음 → 앱에서 refresh 후 전송
           console.log(`${LOG_PREFIX} Session refresh requested from web`);
+          webReadyRef.current = true;
           refreshAndSyncSession();
           break;
 
