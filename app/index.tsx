@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
@@ -39,6 +40,9 @@ export default function WebViewScreen() {
   // 스플래시 상태 관리
   const [splashStage, setSplashStage] = useState<SplashStage>('SESSION_CHECK');
   const [showSplash, setShowSplash] = useState(true);
+  const [splashReady, setSplashReady] = useState(false);
+  const [webViewLoaded, setWebViewLoaded] = useState(false);
+  const [canHideSplash, setCanHideSplash] = useState(false);
 
   // 네이티브 인증 상태 관리 (WebView에 토큰 자동 전달)
   const {
@@ -81,6 +85,20 @@ export default function WebViewScreen() {
     }
   }, [isReady]);
 
+  // React 스플래시 렌더링 완료 후 Expo 스플래시 숨김 (흰 화면 방지)
+  useEffect(() => {
+    if (splashReady) {
+      ExpoSplashScreen.hideAsync();
+    }
+  }, [splashReady]);
+
+  // 스플래시 숨김 조건: ROUTE_INFO 수신 + WebView 로드 완료
+  useEffect(() => {
+    if (canHideSplash && webViewLoaded) {
+      setShowSplash(false);
+    }
+  }, [canHideSplash, webViewLoaded]);
+
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handler (switch-case로 타입 내로잉)
   // ─────────────────────────────────────────────────────────────────────────
@@ -90,14 +108,10 @@ export default function WebViewScreen() {
       const msg: WebToAppMessage = JSON.parse(event.nativeEvent.data);
 
       switch (msg.type) {
-        // 라우트 → 실제 페이지 도착 시 스플래시 숨김
+        // 라우트 → 스플래시 숨김 조건 플래그 설정
         case 'ROUTE_INFO':
           setRouteInfo(msg.payload);
-          // 홈 또는 실제 콘텐츠 페이지 도착 시 스플래시 숨김
-          // /app-init, /login은 제외 (로그인 페이지는 스플래시 숨기고 보여줘야 함)
-          if (msg.payload.path !== '/app-init') {
-            setShowSplash(false);
-          }
+          setCanHideSplash(true);
           break;
 
         // 인증 요청
@@ -170,6 +184,7 @@ export default function WebViewScreen() {
           onMessage={handleMessage}
           onShouldStartLoadWithRequest={handleLoadRequest}
           onNavigationStateChange={handleNavigation}
+          onLoadEnd={() => setWebViewLoaded(true)}
           onError={handleWebViewError}
           onHttpError={handleHttpError}
         />
@@ -177,7 +192,7 @@ export default function WebViewScreen() {
 
       {/* React 스플래시 (단계별 메시지) */}
       {showSplash && (
-        <View style={styles.loadingOverlay}>
+        <View style={styles.loadingOverlay} onLayout={() => setSplashReady(true)}>
           <SplashScreen stage={splashStage} />
         </View>
       )}
