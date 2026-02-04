@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,6 +43,7 @@ export default function WebViewScreen() {
   const [splashReady, setSplashReady] = useState(false);
   const [webViewLoaded, setWebViewLoaded] = useState(false);
   const [canHideSplash, setCanHideSplash] = useState(false);
+  const splashOpacity = useRef(new Animated.Value(1)).current;
 
   // 네이티브 인증 상태 관리 (WebView에 토큰 자동 전달)
   const {
@@ -92,12 +93,19 @@ export default function WebViewScreen() {
     }
   }, [splashReady]);
 
-  // 스플래시 숨김 조건: PAGE_RENDERED 수신 + WebView 로드 완료
+  // 스플래시 숨김: PAGE_RENDERED 수신 + WebView 로드 완료 → 페이드 아웃
   useEffect(() => {
     if (canHideSplash && webViewLoaded) {
-      setShowSplash(false);
+      // 페이드 아웃 애니메이션 (300ms) - WebView가 렌더링될 시간 확보
+      Animated.timing(splashOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        setShowSplash(false);
+      });
     }
-  }, [canHideSplash, webViewLoaded]);
+  }, [canHideSplash, webViewLoaded, splashOpacity]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Message Handler (switch-case로 타입 내로잉)
@@ -182,7 +190,7 @@ export default function WebViewScreen() {
         <WebView
           ref={webViewRef}
           source={{ uri: url }}
-          style={styles.webview}
+          style={[styles.webview, { backgroundColor: theme.background }]}
           userAgent={CHROME_USER_AGENT}
           {...WEBVIEW_BASE_PROPS}
           onMessage={handleMessage}
@@ -194,11 +202,14 @@ export default function WebViewScreen() {
         />
       )}
 
-      {/* React 스플래시 (단계별 메시지) */}
+      {/* React 스플래시 (단계별 메시지) - 페이드 아웃으로 부드러운 전환 */}
       {showSplash && (
-        <View style={styles.loadingOverlay} onLayout={() => setSplashReady(true)}>
+        <Animated.View
+          style={[styles.loadingOverlay, { opacity: splashOpacity }]}
+          onLayout={() => setSplashReady(true)}
+        >
           <SplashScreen stage={splashStage} />
-        </View>
+        </Animated.View>
       )}
 
       {/* Image Picker ActionSheet */}
