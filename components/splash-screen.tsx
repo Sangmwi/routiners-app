@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   Animated,
   Dimensions,
@@ -11,6 +10,7 @@ import {
 import { BlurView } from 'expo-blur';
 
 import { useTheme, COLORS } from '@/lib/theme';
+import LogoFill from '@/assets/logos/brand/logo-fill.svg';
 
 // ============================================================================
 // Types
@@ -99,11 +99,7 @@ export function SplashScreen({ stage = 'SESSION_CHECK' }: SplashScreenProps) {
 
       {/* Logo with pulse */}
       <Animated.View style={[styles.logoContainer, { opacity: logoOpacity }]}>
-        <Image
-          source={require('@/assets/images/splash-icon.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        <LogoFill width={LOGO_SIZE} height={LOGO_SIZE} />
       </Animated.View>
 
       {/* Brand name */}
@@ -158,10 +154,6 @@ const styles = StyleSheet.create({
   // Logo
   logoContainer: {
     marginBottom: 16,
-  },
-  logo: {
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
   },
 
   // Text
