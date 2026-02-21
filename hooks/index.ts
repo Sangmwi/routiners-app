@@ -26,6 +26,7 @@ export { useSessionNavigation } from './use-session-navigation';
 export { useInitialUrl } from './use-initial-url';
 export { useSmartBackHandler } from './use-smart-back-handler';
 export { useImagePicker } from './use-image-picker';
+export { useWebViewMessageDispatcher } from './use-webview-message-dispatcher';
 
 // ============================================================================
 // UI Hooks

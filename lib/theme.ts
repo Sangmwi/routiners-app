@@ -13,6 +13,11 @@ export const COLORS = {
   primaryLight: '#5fc07f', // green-400 (다크모드용)
   primaryDark: '#328a4d', // green-600
   primaryDarker: '#1B6523', // green-700
+  primaryMedium: '#b9eac8', // green-200
+  primarySubtle: '#dbf5e2', // green-100
+  primaryDarkLight: '#334155', // slate-700
+  primaryDarkMedium: '#1e293b', // slate-800
+  primaryDarkSubtle: '#0f172a', // slate-900
 
   // Green Scale
   green50: '#f0faf3',

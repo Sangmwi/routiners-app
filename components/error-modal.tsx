@@ -1,27 +1,7 @@
-/**
- * WebView 에러 모달
- *
- * Alert 대신 앱 스타일의 에러 모달을 표시합니다.
- * - 깔끔한 에러 UI
- * - 접기 방식으로 상세 로그 표시 (MVP/디버깅용)
- * - 재시도 / 닫기 버튼
- */
-
-import { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  StyleSheet,
-  Animated,
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useComponentTheme } from '@/lib/theme';
-
-// ============================================================================
-// Types
-// ============================================================================
+import BaseSheetModal from '@/components/ui/BaseSheetModal';
 
 export interface WebViewError {
   code?: number;
@@ -32,25 +12,11 @@ export interface WebViewError {
 }
 
 export interface ErrorModalProps {
-  /** 모달 표시 여부 */
   visible: boolean;
-  /** 닫기 핸들러 */
   onClose: () => void;
-  /** 재시도 핸들러 */
   onRetry: () => void;
-  /** 에러 정보 */
   error: WebViewError | null;
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const ANIMATION_DURATION = 200;
-
-// ============================================================================
-// Component
-// ============================================================================
 
 export function ErrorModal({
   visible,
@@ -59,50 +25,20 @@ export function ErrorModal({
   error,
 }: ErrorModalProps) {
   const theme = useComponentTheme();
+  const styles = createStyles(theme);
   const [showDetails, setShowDetails] = useState(false);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    if (visible) {
-      // 열기 애니메이션
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: ANIMATION_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 8,
-          tension: 100,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      // 닫기 애니메이션
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: ANIMATION_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.9,
-          duration: ANIMATION_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      // 닫힐 때 상세 정보 접기
+    if (!visible) {
       setShowDetails(false);
     }
-  }, [visible, fadeAnim, scaleAnim]);
+  }, [visible]);
 
   const getErrorMessage = () => {
     if (error?.type === 'http') {
-      return '서버에서 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.';
+      return '서버에서 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.';
     }
-    return '서버에 연결할 수 없습니다.\n인터넷 연결을 확인해주세요.';
+    return '서버에 연결할 수 없습니다.\n인터넷 연결을 확인해 주세요.';
   };
 
   const getErrorTitle = () => {
@@ -112,101 +48,68 @@ export function ErrorModal({
     return '연결 오류';
   };
 
-  const styles = createStyles(theme);
-
   return (
-    <Modal
+    <BaseSheetModal
       visible={visible}
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={onClose}
+      onClose={onClose}
+      presentation="dialog"
+      contentStyle={styles.container}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-          <TouchableWithoutFeedback>
-            <Animated.View
-              style={[
-                styles.container,
-                { transform: [{ scale: scaleAnim }] },
-              ]}
-            >
-              {/* 타이틀 */}
-              <Text style={styles.title}>{getErrorTitle()}</Text>
+      <Text style={styles.title}>{getErrorTitle()}</Text>
+      <Text style={styles.message}>{getErrorMessage()}</Text>
 
-              {/* 메시지 */}
-              <Text style={styles.message}>{getErrorMessage()}</Text>
+      <TouchableOpacity
+        style={styles.detailsToggle}
+        onPress={() => setShowDetails((prev) => !prev)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.detailsToggleText}>
+          {showDetails ? '▲' : '▼'} 오류 상세 정보
+        </Text>
+      </TouchableOpacity>
 
-              {/* 상세 정보 토글 */}
-              <TouchableOpacity
-                style={styles.detailsToggle}
-                onPress={() => setShowDetails(!showDetails)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.detailsToggleText}>
-                  {showDetails ? '▼' : '▶'} 오류 상세 정보
-                </Text>
-              </TouchableOpacity>
+      {showDetails && error && (
+        <View style={styles.detailsContainer}>
+          {error.code !== undefined && (
+            <Text style={styles.detailsText}>Code: {error.code}</Text>
+          )}
+          {error.statusCode !== undefined && (
+            <Text style={styles.detailsText}>HTTP: {error.statusCode}</Text>
+          )}
+          {error.description && (
+            <Text style={styles.detailsText}>{error.description}</Text>
+          )}
+          {error.url && (
+            <Text style={styles.detailsText} numberOfLines={2}>
+              URL: {error.url}
+            </Text>
+          )}
+        </View>
+      )}
 
-              {/* 상세 정보 */}
-              {showDetails && error && (
-                <View style={styles.detailsContainer}>
-                  {error.code !== undefined && (
-                    <Text style={styles.detailsText}>Code: {error.code}</Text>
-                  )}
-                  {error.statusCode !== undefined && (
-                    <Text style={styles.detailsText}>HTTP: {error.statusCode}</Text>
-                  )}
-                  {error.description && (
-                    <Text style={styles.detailsText}>{error.description}</Text>
-                  )}
-                  {error.url && (
-                    <Text style={styles.detailsText} numberOfLines={2}>
-                      URL: {error.url}
-                    </Text>
-                  )}
-                </View>
-              )}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, styles.retryButton]}
+          onPress={onRetry}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.retryButtonText}>다시 시도</Text>
+        </TouchableOpacity>
 
-              {/* 버튼 */}
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.retryButton]}
-                  onPress={onRetry}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.retryButtonText}>재시도</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.button, styles.closeButton]}
-                  onPress={onClose}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.closeButtonText}>닫기</Text>
-                </TouchableOpacity>
-              </View>
-            </Animated.View>
-          </TouchableWithoutFeedback>
-        </Animated.View>
-      </TouchableWithoutFeedback>
-    </Modal>
+        <TouchableOpacity
+          style={[styles.button, styles.closeButton]}
+          onPress={onClose}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.closeButtonText}>닫기</Text>
+        </TouchableOpacity>
+      </View>
+    </BaseSheetModal>
   );
 }
 
-// ============================================================================
-// Styles
-// ============================================================================
-
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: theme.overlay,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 24,
-    },
     container: {
       backgroundColor: theme.card,
       borderRadius: 16,

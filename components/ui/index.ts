@@ -6,3 +6,4 @@
 
 export { default as ActionSheet } from './ActionSheet';
 export type { ActionSheetProps, ActionSheetOption } from './ActionSheet';
+export { default as BaseSheetModal } from './BaseSheetModal';
