@@ -51,7 +51,7 @@ export const getAppInitUrl = (): string => {
 // Navigation
 // ============================================================================
 
-export const TAB_ROUTES = ['/', '/ai', '/community', '/profile'] as const;
+export const TAB_ROUTES = ['/', '/routine', '/stats', '/community', '/profile'] as const;
 export type TabRoute = (typeof TAB_ROUTES)[number];
 
 export const isTabRoute = (path: string): path is TabRoute =>
