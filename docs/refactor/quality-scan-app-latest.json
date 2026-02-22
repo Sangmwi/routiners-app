@@ -1,0 +1,393 @@
+{
+  "summary": {
+    "files_scanned": 47,
+    "duplicate_groups": 19,
+    "large_files": 1,
+    "files_with_long_lines": 2
+  },
+  "thresholds": {
+    "window": 6,
+    "large_file_lines": 400,
+    "long_line_length": 140
+  },
+  "large_files": [
+    {
+      "path": "C:/routiners/routiners-app/plugins/withWebViewFileFix.js",
+      "line_count": 408
+    }
+  ],
+  "long_line_files": [
+    {
+      "path": "C:/routiners/routiners-app/constants/theme.ts",
+      "long_line_count": 1,
+      "sample_lines": [
+        3
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-app/scripts/reset-project.js",
+      "long_line_count": 1,
+      "sample_lines": [
+        5
+      ]
+    }
+  ],
+  "duplicate_groups": [
+    {
+      "fingerprint": "582fd92fe28dd74ac780864bef98130057653577",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/app/index.tsx",
+          "line": 156
+        },
+        {
+          "path": "C:/routiners/routiners-app/components/splash-screen.tsx",
+          "line": 114
+        },
+        {
+          "path": "C:/routiners/routiners-app/app/auth/callback.tsx",
+          "line": 79
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-app/app/auth/callback.tsx",
+        "C:/routiners/routiners-app/app/index.tsx",
+        "C:/routiners/routiners-app/components/splash-screen.tsx"
+      ]
+    },
+    {
+      "fingerprint": "92fc59a0ff619f802a33f7782466ffca904bb4bc",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/app/index.tsx",
+          "line": 57
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-session-navigation.ts",
+          "line": 34
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/app/index.tsx",
+        "C:/routiners/routiners-app/hooks/use-session-navigation.ts"
+      ]
+    },
+    {
+      "fingerprint": "b77db0e86282a64585205799fb25dd7ebe745e35",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/app/index.tsx",
+          "line": 66
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-webview-message-dispatcher.ts",
+          "line": 30
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/app/index.tsx",
+        "C:/routiners/routiners-app/hooks/use-webview-message-dispatcher.ts"
+      ]
+    },
+    {
+      "fingerprint": "aceb99e98262da6975edb3ad16032a574bb51671",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/app/index.tsx",
+          "line": 67
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-webview-message-dispatcher.ts",
+          "line": 31
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/app/index.tsx",
+        "C:/routiners/routiners-app/hooks/use-webview-message-dispatcher.ts"
+      ]
+    },
+    {
+      "fingerprint": "dfa82c545d88e64de1e904c4fccbdccd967a0af8",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/app/index.tsx",
+          "line": 157
+        },
+        {
+          "path": "C:/routiners/routiners-app/components/parallax-scroll-view.tsx",
+          "line": 62
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/app/index.tsx",
+        "C:/routiners/routiners-app/components/parallax-scroll-view.tsx"
+      ]
+    },
+    {
+      "fingerprint": "b9df73e5c9e04e548b9a9d4b341fa30d336a3d1a",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/components/error-modal.tsx",
+          "line": 107
+        },
+        {
+          "path": "C:/routiners/routiners-app/components/ui/ActionSheet.tsx",
+          "line": 109
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/components/error-modal.tsx",
+        "C:/routiners/routiners-app/components/ui/ActionSheet.tsx"
+      ]
+    },
+    {
+      "fingerprint": "d483b6bd5ab1820d3924a1f0d50f8d782f2f4c81",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/components/error-modal.tsx",
+          "line": 108
+        },
+        {
+          "path": "C:/routiners/routiners-app/components/ui/ActionSheet.tsx",
+          "line": 110
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/components/error-modal.tsx",
+        "C:/routiners/routiners-app/components/ui/ActionSheet.tsx"
+      ]
+    },
+    {
+      "fingerprint": "21d43979dd3fe1126d8a84e9d5a507e56ac84c72",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/components/splash-screen.tsx",
+          "line": 115
+        },
+        {
+          "path": "C:/routiners/routiners-app/app/auth/callback.tsx",
+          "line": 80
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/app/auth/callback.tsx",
+        "C:/routiners/routiners-app/components/splash-screen.tsx"
+      ]
+    },
+    {
+      "fingerprint": "65041701fd1b49625d8bf8084bd829a91f63d2c7",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/components/splash-screen.tsx",
+          "line": 116
+        },
+        {
+          "path": "C:/routiners/routiners-app/app/auth/callback.tsx",
+          "line": 81
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 2,
+      "files": [
+        "C:/routiners/routiners-app/app/auth/callback.tsx",
+        "C:/routiners/routiners-app/components/splash-screen.tsx"
+      ]
+    },
+    {
+      "fingerprint": "0aed2580d37e9a74e33a02c17f03a69ba191e434",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 70
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 104
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "7b6a2dd6ffb443bfb3464a80ee520f3dc424ba77",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 71
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 105
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "dc8c864e31c9a29bafb6fc6e82949aed273ac58d",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 72
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 106
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "abcaa626ceb37a46e0c11de861987d0e0ae01759",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 73
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 107
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "c28fe6192ebdf7aea9af5aa9257d2e66c16bad20",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 74
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 108
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "a809df15dc83913285fd733d32eb36d6d3796d8a",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 75
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 109
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "f85550a87849be2401c9d225b16265b43a199330",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 111
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "5e1ab1214dcad0b1292ffb2c7a447d7240ce46d7",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 78
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 112
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "40fcd864790690c71f1c4d25dd64505791c804d8",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 113
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    },
+    {
+      "fingerprint": "cb73ec89fc7daba570caeadaafa376e5af5f9907",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 81
+        },
+        {
+          "path": "C:/routiners/routiners-app/hooks/use-image-picker.ts",
+          "line": 115
+        }
+      ],
+      "occurrence_count": 2,
+      "file_count": 1,
+      "files": [
+        "C:/routiners/routiners-app/hooks/use-image-picker.ts"
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useComponentTheme } from '@/lib/theme';
 import BaseSheetModal from '@/components/ui/BaseSheetModal';
+import SheetInfoHeader from '@/components/ui/SheetInfoHeader';
 
 export interface WebViewError {
   code?: number;
@@ -17,6 +18,17 @@ export interface ErrorModalProps {
   onRetry: () => void;
   error: WebViewError | null;
 }
+
+const ERROR_CONTENT = {
+  http: {
+    title: '서버 오류',
+    message: '서버에서 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.',
+  },
+  connection: {
+    title: '연결 오류',
+    message: '서버에 연결할 수 없습니다.\n네트워크 연결을 확인해 주세요.',
+  },
+} as const;
 
 export function ErrorModal({
   visible,
@@ -34,19 +46,7 @@ export function ErrorModal({
     }
   }, [visible]);
 
-  const getErrorMessage = () => {
-    if (error?.type === 'http') {
-      return '서버에서 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.';
-    }
-    return '서버에 연결할 수 없습니다.\n인터넷 연결을 확인해 주세요.';
-  };
-
-  const getErrorTitle = () => {
-    if (error?.type === 'http') {
-      return '서버 오류';
-    }
-    return '연결 오류';
-  };
+  const content = error?.type === 'http' ? ERROR_CONTENT.http : ERROR_CONTENT.connection;
 
   return (
     <BaseSheetModal
@@ -55,8 +55,13 @@ export function ErrorModal({
       presentation="dialog"
       contentStyle={styles.container}
     >
-      <Text style={styles.title}>{getErrorTitle()}</Text>
-      <Text style={styles.message}>{getErrorMessage()}</Text>
+      <SheetInfoHeader
+        title={content.title}
+        message={content.message}
+        containerStyle={styles.header}
+        titleStyle={styles.title}
+        messageStyle={styles.message}
+      />
 
       <TouchableOpacity
         style={styles.detailsToggle}
@@ -64,7 +69,7 @@ export function ErrorModal({
         activeOpacity={0.7}
       >
         <Text style={styles.detailsToggleText}>
-          {showDetails ? '▲' : '▼'} 오류 상세 정보
+          {showDetails ? '▼' : '▶'} 오류 상세 정보
         </Text>
       </TouchableOpacity>
 
@@ -117,19 +122,20 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
       width: '100%',
       maxWidth: 320,
     },
+    header: {
+      marginBottom: 16,
+    },
     title: {
       fontSize: 18,
       fontWeight: '700',
       color: theme.text,
       textAlign: 'center',
-      marginBottom: 12,
     },
     message: {
       fontSize: 14,
       color: theme.textMuted,
       textAlign: 'center',
       lineHeight: 20,
-      marginBottom: 16,
     },
     detailsToggle: {
       paddingVertical: 8,

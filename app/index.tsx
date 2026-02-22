@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ErrorModal } from '@/components/error-modal';
-import { SplashScreen, type SplashStage } from '@/components/splash-screen';
+import { SplashScreen } from '@/components/splash-screen';
 import {
   useAuth,
   useAuthHandlers,
@@ -13,6 +12,7 @@ import {
   useInitialUrl,
   useSessionNavigation,
   useSmartBackHandler,
+  useSplashTransition,
   useWebViewErrors,
   useWebViewMessageDispatcher,
   useWebViewNavigation,
@@ -31,13 +31,15 @@ export default function WebViewScreen() {
 
   const webViewRef = useRef<WebView>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
-
-  const [splashStage, setSplashStage] = useState<SplashStage>('SESSION_CHECK');
-  const [showSplash, setShowSplash] = useState(true);
-  const [splashReady, setSplashReady] = useState(false);
-  const [webViewLoaded, setWebViewLoaded] = useState(false);
-  const [canHideSplash, setCanHideSplash] = useState(false);
-  const splashOpacity = useRef(new Animated.Value(1)).current;
+  const {
+    splashStage,
+    setSplashStage,
+    showSplash,
+    splashOpacity,
+    setCanHideSplash,
+    setWebViewLoaded,
+    markSplashReady,
+  } = useSplashTransition();
 
   const { session, isReady, signOut, signInWithGoogle, handleWebMessage } =
     useAuth(webViewRef);
@@ -76,27 +78,7 @@ export default function WebViewScreen() {
     if (isReady) {
       setSplashStage('WEBVIEW_LOAD');
     }
-  }, [isReady]);
-
-  useEffect(() => {
-    if (splashReady) {
-      ExpoSplashScreen.hideAsync();
-    }
-  }, [splashReady]);
-
-  useEffect(() => {
-    if (!(canHideSplash && webViewLoaded)) return;
-
-    const timer = setTimeout(() => {
-      Animated.timing(splashOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => setShowSplash(false));
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, [canHideSplash, webViewLoaded, splashOpacity]);
+  }, [isReady, setSplashStage]);
 
   const { handleLoadRequest, handleNavigation } = useWebViewNavigation({
     setUrl,
@@ -136,7 +118,7 @@ export default function WebViewScreen() {
       {showSplash && (
         <Animated.View
           style={[styles.loadingOverlay, { opacity: splashOpacity }]}
-          onLayout={() => setSplashReady(true)}
+          onLayout={markSplashReady}
         >
           <SplashScreen stage={splashStage} />
         </Animated.View>

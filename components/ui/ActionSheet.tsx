@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useComponentTheme } from '@/lib/theme';
 import BaseSheetModal from './BaseSheetModal';
+import SheetInfoHeader from './SheetInfoHeader';
 
 export interface ActionSheetOption {
   label: string;
@@ -68,10 +69,13 @@ export default function ActionSheet({
       </View>
 
       {(title || message) && (
-        <View style={styles.header}>
-          {title && <Text style={styles.title}>{title}</Text>}
-          {message && <Text style={styles.message}>{message}</Text>}
-        </View>
+        <SheetInfoHeader
+          title={title}
+          message={message}
+          containerStyle={styles.header}
+          titleStyle={styles.title}
+          messageStyle={styles.message}
+        />
       )}
 
       <View style={styles.optionsContainer}>
