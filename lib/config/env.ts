@@ -8,7 +8,7 @@
 export interface AppConfig {
   webviewUrl: string;
   supabaseUrl?: string;
-  supabaseAnonKey?: string;
+  supabasePublishableKey?: string;
   apiUrl?: string;
 }
 
@@ -20,7 +20,7 @@ export function getAppConfig(): AppConfig {
   return {
     webviewUrl: process.env.EXPO_PUBLIC_WEBVIEW_URL || 'https://www.google.com',
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
-    supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    supabasePublishableKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     apiUrl: process.env.EXPO_PUBLIC_API_URL,
   };
 }
