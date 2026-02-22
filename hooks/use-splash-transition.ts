@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { Animated } from 'react-native';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import type { SplashStage } from '@/components/splash-screen';
 
 interface UseSplashTransitionReturn {
   splashStage: SplashStage;
-  setSplashStage: (stage: SplashStage) => void;
+  setSplashStage: Dispatch<SetStateAction<SplashStage>>;
   showSplash: boolean;
   splashOpacity: Animated.Value;
-  setCanHideSplash: (canHide: boolean) => void;
-  setWebViewLoaded: (loaded: boolean) => void;
+  setCanHideSplash: Dispatch<SetStateAction<boolean>>;
+  setWebViewLoaded: Dispatch<SetStateAction<boolean>>;
   markSplashReady: () => void;
 }
 
