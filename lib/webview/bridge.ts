@@ -98,5 +98,19 @@ export const WebViewBridge = {
       result,
     });
   },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Keyboard
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /** 키보드 표시 알림 (높이: CSS px 단위) */
+  sendKeyboardShow: (webViewRef: React.RefObject<WebView | null>, height: number) => {
+    sendCommand(webViewRef, { type: 'KEYBOARD_SHOW', height });
+  },
+
+  /** 키보드 숨김 알림 */
+  sendKeyboardHide: (webViewRef: React.RefObject<WebView | null>) => {
+    sendCommand(webViewRef, { type: 'KEYBOARD_HIDE' });
+  },
 };
 

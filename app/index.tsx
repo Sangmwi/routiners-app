@@ -10,6 +10,7 @@ import {
   useAuthHandlers,
   useImagePicker,
   useInitialUrl,
+  useKeyboardBridge,
   useSessionNavigation,
   useSmartBackHandler,
   useSplashTransition,
@@ -79,6 +80,8 @@ export default function WebViewScreen() {
       setSplashStage('WEBVIEW_LOAD');
     }
   }, [isReady, setSplashStage]);
+
+  useKeyboardBridge({ webViewRef, isReady });
 
   const { handleLoadRequest, handleNavigation } = useWebViewNavigation({
     setUrl,

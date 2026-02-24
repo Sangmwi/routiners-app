@@ -28,6 +28,7 @@ export { useSmartBackHandler } from './use-smart-back-handler';
 export { useImagePicker } from './use-image-picker';
 export { useWebViewMessageDispatcher } from './use-webview-message-dispatcher';
 export { useSplashTransition } from './use-splash-transition';
+export { useKeyboardBridge } from './use-keyboard-bridge';
 
 // ============================================================================
 // UI Hooks

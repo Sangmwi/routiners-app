@@ -1,9 +1,8 @@
 /**
  * WebView Bridge Types
  *
- * ⚠️ SYNCED FROM WEB
- * 원본: routiners-web/lib/webview/types.ts
- * 직접 수정하지 마세요. 웹에서 수정 후 복사하세요.
+ * ⚠️ SOURCE OF TRUTH
+ * 이 파일 수정 시 앱의 lib/webview/types.ts에도 동일하게 반영하세요.
  */
 
 // ============================================================================
@@ -59,7 +58,9 @@ export type AppToWebMessage =
   | { type: 'CLEAR_SESSION' }
   | { type: 'LOGIN_ERROR'; error: string }
   | { type: 'LOGIN_CANCELLED' }
-  | { type: 'IMAGE_PICKER_RESULT'; requestId: string; result: ImagePickerResult };
+  | { type: 'IMAGE_PICKER_RESULT'; requestId: string; result: ImagePickerResult }
+  | { type: 'KEYBOARD_SHOW'; height: number }
+  | { type: 'KEYBOARD_HIDE' };
 
 /** 웹 → 앱 메시지 (postMessage로 전송) */
 export type WebToAppMessage =
