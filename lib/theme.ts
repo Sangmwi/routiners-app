@@ -54,7 +54,7 @@ export const COLORS = {
  */
 export const WEBVIEW_THEME = {
   light: {
-    background: '#f8faf8', // 웹 라이트모드 배경
+    background: '#f3f6f3', // 웹 라이트모드 배경
     statusBar: 'dark' as const,
     text: '#0f172a', // slate-900
     textMuted: COLORS.textMutedDark,
@@ -76,7 +76,7 @@ export type Theme = (typeof WEBVIEW_THEME)[ThemeMode];
 export const COMPONENT_THEME = {
   light: {
     // Backgrounds
-    background: '#f8faf8',
+    background: '#f3f6f3',
     card: '#ffffff',
     muted: '#e8f4eb',
     overlay: 'rgba(0, 0, 0, 0.5)',
