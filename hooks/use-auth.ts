@@ -16,10 +16,9 @@ import { Session } from '@supabase/supabase-js';
 import WebView from 'react-native-webview';
 import {
   GoogleSignin,
-  isSuccessResponse,
-  isErrorWithCode,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import type { NativeModuleError } from '@react-native-google-signin/google-signin';
 import { supabase } from '@/lib/supabase/client';
 import { WebToAppMessage, WebViewBridge } from '@/lib/webview';
 
@@ -253,15 +252,9 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
       // Google Play Services 확인
       await GoogleSignin.hasPlayServices();
 
-      // 네이티브 Google Sign-In UI 실행
-      const response = await GoogleSignin.signIn();
-
-      if (!isSuccessResponse(response)) {
-        console.log(`${LOG_PREFIX} Google Sign-In was cancelled`);
-        return false;
-      }
-
-      const { idToken } = response.data;
+      // 네이티브 Google Sign-In UI 실행 (v11: 직접 User 반환)
+      const user = await GoogleSignin.signIn();
+      const idToken = user.idToken;
 
       if (!idToken) {
         throw new Error('No idToken received from Google Sign-In');
@@ -299,8 +292,9 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
       return true;
 
     } catch (error) {
-      if (isErrorWithCode(error)) {
-        switch (error.code) {
+      const nativeError = error as NativeModuleError;
+      if (nativeError.code) {
+        switch (nativeError.code) {
           case statusCodes.SIGN_IN_CANCELLED:
             console.log(`${LOG_PREFIX} User cancelled the sign-in`);
             return false;
@@ -311,7 +305,7 @@ export function useAuth(webViewRef: React.RefObject<WebView | null>): UseAuthRes
             console.error(`${LOG_PREFIX} Play Services not available`);
             break;  // 에러로 처리
           default:
-            console.error(`${LOG_PREFIX} Google Sign-In error:`, error.code, error.message);
+            console.error(`${LOG_PREFIX} Google Sign-In error:`, nativeError.code, nativeError.message);
         }
       } else {
         console.error(`${LOG_PREFIX} Unexpected error:`, error);

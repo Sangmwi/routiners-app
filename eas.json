@@ -10,7 +10,7 @@
       "env": {
         "EXPO_PUBLIC_WEBVIEW_URL": "http://192.168.0.18:3000",
         "EXPO_PUBLIC_SUPABASE_URL": "https://atsnifcqrmartpglrshq.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_djWmiVAxU_OA3brLnPOhvw_xZCrGrfN",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_djWmiVAxU_OA3brLnPOhvw_xZCrGrfN",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "386612269350-dbqe48mup28kdto2ps786ar2ef23se2q.apps.googleusercontent.com"
       },
       "android": {
@@ -25,7 +25,7 @@
       "env": {
         "EXPO_PUBLIC_WEBVIEW_URL": "https://routiners-web.vercel.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://atsnifcqrmartpglrshq.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_djWmiVAxU_OA3brLnPOhvw_xZCrGrfN",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_djWmiVAxU_OA3brLnPOhvw_xZCrGrfN",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "386612269350-dbqe48mup28kdto2ps786ar2ef23se2q.apps.googleusercontent.com"
       },
       "android": {
@@ -39,7 +39,7 @@
       "env": {
         "EXPO_PUBLIC_WEBVIEW_URL": "https://routiners-web.vercel.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://atsnifcqrmartpglrshq.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_djWmiVAxU_OA3brLnPOhvw_xZCrGrfN",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_djWmiVAxU_OA3brLnPOhvw_xZCrGrfN",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "386612269350-dbqe48mup28kdto2ps786ar2ef23se2q.apps.googleusercontent.com"
       },
       "android": {
