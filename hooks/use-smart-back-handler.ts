@@ -28,6 +28,7 @@ export const useSmartBackHandler = ({
   hasOverlay,
 }: SmartBackHandlerConfig) => {
   const lastBackPressRef = useRef(0);
+  const overlayBackCooldownRef = useRef(false);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Navigation Actions
@@ -52,6 +53,9 @@ export const useSmartBackHandler = ({
 
     // Case 0: 오버레이 열린 상태 → goBack()으로 오버레이 닫기
     if (hasOverlay) {
+      if (overlayBackCooldownRef.current) return true;
+      overlayBackCooldownRef.current = true;
+      setTimeout(() => { overlayBackCooldownRef.current = false; }, 300);
       webViewRef.current?.goBack();
       return true;
     }
