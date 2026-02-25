@@ -15,6 +15,7 @@ import {
 type SmartBackHandlerConfig = {
   webViewRef: React.RefObject<WebView | null>;
   routeInfo: RouteInfo;
+  hasOverlay: boolean;
 };
 
 // ============================================================================
@@ -24,6 +25,7 @@ type SmartBackHandlerConfig = {
 export const useSmartBackHandler = ({
   webViewRef,
   routeInfo,
+  hasOverlay,
 }: SmartBackHandlerConfig) => {
   const lastBackPressRef = useRef(0);
 
@@ -47,6 +49,12 @@ export const useSmartBackHandler = ({
 
   const handleBackPress = useCallback((): boolean => {
     if (!IS_ANDROID) return false;
+
+    // Case 0: 오버레이 열린 상태 → goBack()으로 오버레이 닫기
+    if (hasOverlay) {
+      webViewRef.current?.goBack();
+      return true;
+    }
 
     const { isTabRoute, isHome, canGoBack } = routeInfo;
 
@@ -74,7 +82,7 @@ export const useSmartBackHandler = ({
     lastBackPressRef.current = now;
     showExitToast();
     return true;
-  }, [routeInfo, webViewRef, navigateToHome, showExitToast]);
+  }, [hasOverlay, routeInfo, webViewRef, navigateToHome, showExitToast]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Event Subscription

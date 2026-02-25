@@ -32,6 +32,7 @@ export default function WebViewScreen() {
 
   const webViewRef = useRef<WebView>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
+  const [hasOverlay, setHasOverlay] = useState(false);
   const {
     splashStage,
     setSplashStage,
@@ -46,7 +47,7 @@ export default function WebViewScreen() {
     useAuth(webViewRef);
 
   const { url, setUrl, isUrlInitialized } = useInitialUrl(session, isReady);
-  useSmartBackHandler({ webViewRef, routeInfo });
+  useSmartBackHandler({ webViewRef, routeInfo, hasOverlay });
 
   const { handleImagePickerRequest, ImagePickerSheet } = useImagePicker(webViewRef);
 
@@ -67,6 +68,7 @@ export default function WebViewScreen() {
 
   const { handleMessage } = useWebViewMessageDispatcher({
     setRouteInfo,
+    setHasOverlay,
     setCanHideSplash,
     setSplashStage,
     handleLogout,

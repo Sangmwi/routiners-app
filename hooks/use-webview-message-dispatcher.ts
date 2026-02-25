@@ -7,6 +7,7 @@ type ImagePickerRequest = Extract<WebToAppMessage, { type: 'REQUEST_IMAGE_PICKER
 
 interface UseWebViewMessageDispatcherOptions {
   setRouteInfo: Dispatch<SetStateAction<RouteInfo>>;
+  setHasOverlay: Dispatch<SetStateAction<boolean>>;
   setCanHideSplash: Dispatch<SetStateAction<boolean>>;
   setSplashStage: Dispatch<SetStateAction<SplashStage>>;
   handleLogout: () => void | Promise<void>;
@@ -28,6 +29,7 @@ function parseWebMessage(raw: string): WebToAppMessage | null {
 
 export function useWebViewMessageDispatcher({
   setRouteInfo,
+  setHasOverlay,
   setCanHideSplash,
   setSplashStage,
   handleLogout,
@@ -43,6 +45,9 @@ export function useWebViewMessageDispatcher({
       switch (message.type) {
         case 'ROUTE_INFO':
           setRouteInfo(message.payload);
+          break;
+        case 'OVERLAY_STATE':
+          setHasOverlay(message.payload.hasOverlay);
           break;
         case 'PAGE_RENDERED':
           setCanHideSplash(true);
@@ -76,6 +81,7 @@ export function useWebViewMessageDispatcher({
       handleNativeLogin,
       handleWebMessage,
       setCanHideSplash,
+      setHasOverlay,
       setRouteInfo,
       setSplashStage,
     ],

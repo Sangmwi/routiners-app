@@ -72,4 +72,5 @@ export type WebToAppMessage =
   | { type: 'REQUEST_SESSION_REFRESH' }
   | { type: 'SESSION_EXPIRED' }
   | { type: 'REQUEST_IMAGE_PICKER'; requestId: string; source: ImagePickerSource }
-  | { type: 'PAGE_RENDERED' };
+  | { type: 'PAGE_RENDERED' }
+  | { type: 'OVERLAY_STATE'; payload: { hasOverlay: boolean } };
