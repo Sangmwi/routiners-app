@@ -1,8 +1,9 @@
+import 'react-native-reanimated';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import 'react-native-reanimated';
 
 // 네이티브 스플래시 자동 숨김 방지 (React 스플래시 렌더링 완료까지 유지)
 SplashScreen.preventAutoHideAsync();
