@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "routiners",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.routiners.app",
@@ -23,8 +23,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": false,
-      "softwareKeyboardLayoutMode": "resize",
+      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.routiners.app"
     },
@@ -47,6 +46,7 @@
         }
       ],
       "./plugins/withWebViewFileFix",
+      "react-native-keyboard-controller",
       "@react-native-google-signin/google-signin"
     ],
     "experiments": {
