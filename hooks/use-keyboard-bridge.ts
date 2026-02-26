@@ -26,7 +26,7 @@ export function useKeyboardBridge({ webViewRef, isReady }: UseKeyboardBridgeOpti
   };
 
   useKeyboardHandler({
-    onEnd: (e) => {
+    onStart: (e) => {
       'worklet';
       if (!isReady) return;
 
