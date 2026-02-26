@@ -46,7 +46,6 @@
         }
       ],
       "./plugins/withWebViewFileFix",
-      "react-native-keyboard-controller",
       "@react-native-google-signin/google-signin"
     ],
     "experiments": {
