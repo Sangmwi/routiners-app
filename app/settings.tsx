@@ -233,7 +233,7 @@ export default function SettingsScreen() {
       <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
         <View style={[styles.header, { borderBottomColor: theme.border }]}> 
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Text style={[styles.backText, { color: theme.textMuted }]}>뒤로</Text>
+            <AppIcons.caretLeft size={24} color={theme.textMuted} weight="regular" />
           </Pressable>
           <Text style={[styles.title, { color: theme.text }]}>설정</Text>
           <View style={styles.placeholder} />
@@ -331,10 +331,6 @@ const styles = StyleSheet.create({
     minWidth: 44,
     minHeight: 44,
     justifyContent: 'center',
-  },
-  backText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   title: {
     fontSize: layout.typography.title,

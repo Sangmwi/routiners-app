@@ -40,6 +40,8 @@ export default function AppDialog({
       onClose={onClose}
       presentation="dialog"
       closeOnBackdropPress={!loading}
+      backdropBlur
+      backdropIntensity={layout.modal.blurIntensity}
       contentStyle={styles.container}
       overlayStyle={styles.overlay}
     >
@@ -72,42 +74,44 @@ export default function AppDialog({
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
     overlay: {
-      backgroundColor: theme.isDark ? THEME_TOKENS.layout.modal.backdropDark : THEME_TOKENS.layout.modal.backdropLight,
+      backgroundColor: theme.isDark
+        ? `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`
+        : `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`,
     },
     container: {
       width: '100%',
-      maxWidth: 360,
+      maxWidth: layout.modal.maxWidth,
       backgroundColor: theme.card,
       borderRadius: layout.modal.cardRadius,
-      paddingHorizontal: layout.space[24],
-      paddingVertical: layout.space[20],
+      paddingHorizontal: layout.modal.paddingX,
+      paddingVertical: layout.modal.paddingY,
     },
     content: {
-      gap: layout.space[12],
+      gap: layout.modal.contentGap,
     },
     title: {
-      fontSize: 40 / 2,
+      fontSize: layout.modal.titleSize,
       fontWeight: '700',
       color: theme.text,
     },
     message: {
-      fontSize: 16,
-      lineHeight: 24,
+      fontSize: layout.modal.messageSize,
+      lineHeight: layout.modal.messageLineHeight,
       color: theme.textMuted,
     },
     actions: {
       marginTop: layout.space[10],
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      gap: layout.modal.actionGap,
+      gap: layout.modal.buttonGap,
     },
     actionsSingle: {
       justifyContent: 'flex-end',
     },
     loadingButton: {
-      minWidth: 120,
-      minHeight: 44,
-      borderRadius: layout.radius.lg,
+      minWidth: layout.modal.actionMinWidth,
+      minHeight: layout.modal.actionMinHeight,
+      borderRadius: layout.modal.actionRadius,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: theme.primary,

@@ -49,7 +49,15 @@ export default function ActionSheet({
   };
 
   return (
-    <BaseSheetModal visible={visible} onClose={onClose} presentation="sheet" contentStyle={styles.container}>
+    <BaseSheetModal
+      visible={visible}
+      onClose={onClose}
+      presentation="sheet"
+      backdropBlur
+      backdropIntensity={layout.modal.blurIntensity}
+      contentStyle={styles.container}
+      overlayStyle={styles.overlay}
+    >
       <View style={styles.handleContainer}>
         <View style={styles.handle} />
       </View>
@@ -94,6 +102,11 @@ export default function ActionSheet({
 
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
+    overlay: {
+      backgroundColor: theme.isDark
+        ? `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`
+        : `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`,
+    },
     container: {
       backgroundColor: theme.card,
       borderTopLeftRadius: layout.radius.x2,

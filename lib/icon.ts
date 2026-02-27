@@ -3,6 +3,7 @@
   Calendar,
   Camera,
   CaretRight,
+  CaretLeft,
   ChartBar,
   Crown,
   Envelope,
@@ -40,6 +41,7 @@ export const AppIcons = {
   ticket: Ticket,
   usersThree: UsersThree,
   caretRight: CaretRight,
+  caretLeft: CaretLeft,
 
   camera: Camera,
   image: Image,

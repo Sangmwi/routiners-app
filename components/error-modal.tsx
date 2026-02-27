@@ -45,7 +45,15 @@ export function ErrorModal({ visible, onClose, onRetry, error }: ErrorModalProps
   const content = error?.type === 'http' ? ERROR_CONTENT.http : ERROR_CONTENT.connection;
 
   return (
-    <BaseSheetModal visible={visible} onClose={onClose} presentation="dialog" contentStyle={styles.container}>
+    <BaseSheetModal
+      visible={visible}
+      onClose={onClose}
+      presentation="dialog"
+      backdropBlur
+      backdropIntensity={layout.modal.blurIntensity}
+      contentStyle={styles.container}
+      overlayStyle={styles.overlay}
+    >
       <Text style={styles.title}>{content.title}</Text>
       <Text style={styles.message}>{content.message}</Text>
 
@@ -76,14 +84,19 @@ export function ErrorModal({ visible, onClose, onRetry, error }: ErrorModalProps
 
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
+    overlay: {
+      backgroundColor: theme.isDark
+        ? `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`
+        : `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`,
+    },
     container: {
       width: '100%',
-      maxWidth: 360,
+      maxWidth: layout.modal.maxWidth,
       borderRadius: layout.modal.cardRadius,
       backgroundColor: theme.card,
-      paddingHorizontal: layout.space[24],
-      paddingVertical: layout.space[20],
-      gap: layout.space[10],
+      paddingHorizontal: layout.modal.paddingX,
+      paddingVertical: layout.modal.paddingY,
+      gap: layout.modal.contentGap,
     },
     title: {
       fontSize: 17,
@@ -118,6 +131,6 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
       marginTop: layout.space[6],
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      gap: layout.modal.actionGap,
+      gap: layout.modal.buttonGap,
     },
   });

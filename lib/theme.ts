@@ -6,6 +6,8 @@ import { useThemePreference } from '@/lib/theme-preference';
 // ============================================================================
 
 const { brand, semantic, layout } = THEME_TOKENS;
+const backdropLight = `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`;
+const backdropDark = `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`;
 
 export const COLORS = {
   primary: brand.green[500],
@@ -68,7 +70,7 @@ export const COMPONENT_THEME = {
     background: semantic.light.background,
     card: semantic.light.card,
     muted: semantic.light.muted,
-    overlay: THEME_TOKENS.layout.modal.backdropLight,
+    overlay: backdropLight,
 
     text: semantic.light.foreground,
     textSecondary: brand.green[600],
@@ -89,7 +91,7 @@ export const COMPONENT_THEME = {
     background: semantic.dark.background,
     card: semantic.dark.card,
     muted: semantic.dark.muted,
-    overlay: THEME_TOKENS.layout.modal.backdropDark,
+    overlay: backdropDark,
 
     text: semantic.dark.foreground,
     textSecondary: semantic.dark.secondaryForeground,

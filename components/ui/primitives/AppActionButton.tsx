@@ -52,9 +52,9 @@ export default function AppActionButton({
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
     base: {
-      minHeight: 44,
-      minWidth: 110,
-      borderRadius: layout.radius.lg,
+      minHeight: layout.modal.actionMinHeight,
+      minWidth: layout.modal.actionMinWidth,
+      borderRadius: layout.modal.actionRadius,
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: layout.space[16],

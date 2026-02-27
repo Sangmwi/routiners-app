@@ -2,12 +2,17 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import {
   Animated,
   Dimensions,
+  Easing,
   Modal,
+  Platform,
   StyleSheet,
   TouchableWithoutFeedback,
+  View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 
 type ModalPresentation = 'sheet' | 'dialog';
@@ -19,6 +24,9 @@ interface BaseSheetModalProps {
   presentation?: ModalPresentation;
   animationDuration?: number;
   closeOnBackdropPress?: boolean;
+  backdropBlur?: boolean;
+  backdropIntensity?: number;
+  dialogAnimation?: 'fade' | 'none';
   contentStyle?: StyleProp<ViewStyle>;
   overlayStyle?: StyleProp<ViewStyle>;
 }
@@ -32,6 +40,9 @@ export default function BaseSheetModal({
   presentation = 'sheet',
   animationDuration = 250,
   closeOnBackdropPress = true,
+  backdropBlur = true,
+  backdropIntensity = THEME_TOKENS.layout.modal.blurIntensity,
+  dialogAnimation = 'fade',
   contentStyle,
   overlayStyle,
 }: BaseSheetModalProps) {
@@ -39,69 +50,37 @@ export default function BaseSheetModal({
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    if (visible) {
-      const enterAnimations: Animated.CompositeAnimation[] = [
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: animationDuration,
-          useNativeDriver: true,
-        }),
-      ];
-
-      if (presentation === 'sheet') {
-        enterAnimations.push(
-          Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: animationDuration,
-            useNativeDriver: true,
-          }),
-        );
-      } else {
-        enterAnimations.push(
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            friction: 8,
-            tension: 100,
-            useNativeDriver: true,
-          }),
-        );
-      }
-
-      Animated.parallel(enterAnimations).start();
+    if (!visible) {
       return;
     }
 
-    const exitAnimations: Animated.CompositeAnimation[] = [
+    fadeAnim.setValue(0);
+
+    const enterAnimations: Animated.CompositeAnimation[] = [
       Animated.timing(fadeAnim, {
-        toValue: 0,
+        toValue: 1,
         duration: animationDuration,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ];
 
     if (presentation === 'sheet') {
-      exitAnimations.push(
+      slideAnim.setValue(SCREEN_HEIGHT);
+      enterAnimations.push(
         Animated.timing(slideAnim, {
-          toValue: SCREEN_HEIGHT,
+          toValue: 0,
           duration: animationDuration,
-          useNativeDriver: true,
-        }),
-      );
-    } else {
-      exitAnimations.push(
-        Animated.timing(scaleAnim, {
-          toValue: 0.9,
-          duration: animationDuration,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       );
     }
 
-    Animated.parallel(exitAnimations).start();
-  }, [animationDuration, fadeAnim, presentation, scaleAnim, slideAnim, visible]);
+    Animated.parallel(enterAnimations).start();
+  }, [animationDuration, fadeAnim, presentation, slideAnim, visible, dialogAnimation]);
 
   const overlayPlacement =
     presentation === 'sheet' ? styles.overlayBottom : styles.overlayCenter;
@@ -109,7 +88,9 @@ export default function BaseSheetModal({
   const contentTransform =
     presentation === 'sheet'
       ? { transform: [{ translateY: slideAnim }] }
-      : { transform: [{ scale: scaleAnim }] };
+      : dialogAnimation === 'none'
+        ? { opacity: 1 }
+        : { opacity: fadeAnim };
 
   const handleBackdropPress = () => {
     if (closeOnBackdropPress) {
@@ -123,6 +104,8 @@ export default function BaseSheetModal({
       transparent
       animationType="none"
       statusBarTranslucent
+      navigationBarTranslucent
+      hardwareAccelerated={Platform.OS === 'android'}
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={handleBackdropPress}>
@@ -130,10 +113,19 @@ export default function BaseSheetModal({
           style={[
             styles.overlay,
             overlayPlacement,
-            { backgroundColor: theme.overlay, opacity: fadeAnim },
+            { opacity: fadeAnim },
             overlayStyle,
           ]}
         >
+          {backdropBlur ? (
+            <BlurView
+              intensity={backdropIntensity}
+              tint={theme.isDark ? 'dark' : 'light'}
+              style={styles.absoluteFill}
+            />
+          ) : null}
+          <View style={[styles.absoluteFill, { backgroundColor: theme.overlay }]} />
+
           <TouchableWithoutFeedback>
             <Animated.View style={[contentTransform, contentStyle]}>
               {children}
@@ -146,8 +138,11 @@ export default function BaseSheetModal({
 }
 
 const styles = StyleSheet.create({
+  absoluteFill: {
+    ...StyleSheet.absoluteFillObject,
+  },
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
   },
   overlayBottom: {
     justifyContent: 'flex-end',
