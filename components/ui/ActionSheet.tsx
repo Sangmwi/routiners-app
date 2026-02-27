@@ -1,11 +1,6 @@
-import type { ReactNode } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from 'react-native';
+﻿import type { ReactNode } from 'react';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 import BaseSheetModal from './BaseSheetModal';
 import SheetInfoHeader from './SheetInfoHeader';
@@ -27,6 +22,8 @@ export interface ActionSheetProps {
   cancelText?: string;
   showCancel?: boolean;
 }
+
+const { layout } = THEME_TOKENS;
 
 export default function ActionSheet({
   visible,
@@ -51,19 +48,8 @@ export default function ActionSheet({
     }
   };
 
-  const handleOptionPress = (option: ActionSheetOption) => {
-    if (option.disabled) return;
-    option.onPress();
-    onClose();
-  };
-
   return (
-    <BaseSheetModal
-      visible={visible}
-      onClose={onClose}
-      presentation="sheet"
-      contentStyle={styles.container}
-    >
+    <BaseSheetModal visible={visible} onClose={onClose} presentation="sheet" contentStyle={styles.container}>
       <View style={styles.handleContainer}>
         <View style={styles.handle} />
       </View>
@@ -80,36 +66,28 @@ export default function ActionSheet({
 
       <View style={styles.optionsContainer}>
         {options.map((option, index) => (
-          <TouchableOpacity
+          <Pressable
             key={`${option.label}-${index}`}
-            style={[
-              styles.option,
-              option.disabled && styles.optionDisabled,
-              index < options.length - 1 && styles.optionBorder,
-            ]}
-            onPress={() => handleOptionPress(option)}
+            onPress={() => {
+              if (option.disabled) return;
+              option.onPress();
+              onClose();
+            }}
             disabled={option.disabled}
-            activeOpacity={0.7}
+            style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
           >
-            {option.icon && <View style={styles.optionIcon}>{option.icon}</View>}
-            <Text
-              style={[
-                styles.optionText,
-                { color: getOptionTextColor(option.variant) },
-                option.disabled && styles.optionTextDisabled,
-              ]}
-            >
-              {option.label}
-            </Text>
-          </TouchableOpacity>
+            {option.icon ? <View style={styles.optionIcon}>{option.icon}</View> : null}
+            <Text style={[styles.optionText, { color: getOptionTextColor(option.variant) }]}>{option.label}</Text>
+            {index < options.length - 1 ? <View style={styles.optionDivider} /> : null}
+          </Pressable>
         ))}
       </View>
 
-      {showCancel && (
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose} activeOpacity={0.7}>
+      {showCancel ? (
+        <Pressable onPress={onClose} style={({ pressed }) => [styles.cancelButton, pressed && styles.optionPressed]}>
           <Text style={styles.cancelText}>{cancelText}</Text>
-        </TouchableOpacity>
-      )}
+        </Pressable>
+      ) : null}
     </BaseSheetModal>
   );
 }
@@ -118,81 +96,85 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
     container: {
       backgroundColor: theme.card,
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+      borderTopLeftRadius: layout.radius.x2,
+      borderTopRightRadius: layout.radius.x2,
+      paddingBottom: Platform.OS === 'ios' ? 34 : 22,
       overflow: 'hidden',
     },
     handleContainer: {
       alignItems: 'center',
-      paddingVertical: 8,
+      paddingVertical: layout.space[8],
     },
     handle: {
       width: 40,
       height: 4,
+      borderRadius: 999,
       backgroundColor: theme.textMuted,
-      borderRadius: 2,
-      opacity: 0.3,
+      opacity: 0.35,
     },
     header: {
-      paddingHorizontal: 20,
-      paddingTop: 8,
-      paddingBottom: 16,
+      paddingHorizontal: layout.space[20],
+      paddingTop: layout.space[4],
+      paddingBottom: layout.space[12],
       alignItems: 'center',
     },
     title: {
       fontSize: 17,
-      fontWeight: '600',
+      fontWeight: '700',
       color: theme.text,
       textAlign: 'center',
     },
     message: {
       fontSize: 14,
+      lineHeight: 20,
       color: theme.textMuted,
       textAlign: 'center',
       marginTop: 4,
     },
     optionsContainer: {
-      marginHorizontal: 12,
-      backgroundColor: theme.isDark ? theme.muted : theme.background,
-      borderRadius: 14,
+      marginHorizontal: layout.space[16],
+      borderRadius: layout.radius.xl,
       overflow: 'hidden',
+      backgroundColor: theme.card,
     },
     option: {
+      minHeight: 54,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 16,
-      paddingHorizontal: 20,
+      paddingHorizontal: layout.space[16],
+      position: 'relative',
     },
-    optionBorder: {
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.border,
-    },
-    optionDisabled: {
-      opacity: 0.4,
+    optionPressed: {
+      opacity: 0.8,
     },
     optionIcon: {
-      marginRight: 12,
+      marginRight: layout.space[10],
     },
     optionText: {
-      fontSize: 18,
-      fontWeight: '500',
+      fontSize: 17,
+      fontWeight: '600',
     },
-    optionTextDisabled: {
-      color: theme.textMuted,
+    optionDivider: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: theme.border,
     },
     cancelButton: {
-      marginTop: 8,
-      marginHorizontal: 12,
-      backgroundColor: theme.isDark ? theme.muted : theme.background,
-      borderRadius: 14,
-      paddingVertical: 16,
+      marginTop: layout.space[8],
+      marginHorizontal: layout.space[16],
+      minHeight: 52,
+      borderRadius: layout.radius.xl,
       alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.card,
     },
     cancelText: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.primary,
+      fontSize: 17,
+      fontWeight: '700',
+      color: theme.text,
     },
   });

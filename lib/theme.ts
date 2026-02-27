@@ -5,7 +5,7 @@ import { useThemePreference } from '@/lib/theme-preference';
 // WebView Theme Configuration
 // ============================================================================
 
-const { brand, semantic } = THEME_TOKENS;
+const { brand, semantic, layout } = THEME_TOKENS;
 
 export const COLORS = {
   primary: brand.green[500],
@@ -67,27 +67,29 @@ export const COMPONENT_THEME = {
   light: {
     background: semantic.light.background,
     card: semantic.light.card,
-    muted: '#e8f4eb',
-    overlay: 'rgba(0, 0, 0, 0.5)',
+    muted: semantic.light.muted,
+    overlay: THEME_TOKENS.layout.modal.backdropLight,
 
     text: semantic.light.foreground,
     textSecondary: brand.green[600],
     textMuted: brand.slate[500],
 
-    border: brand.green[200],
-    borderLight: brand.green[100],
+    border: semantic.light.border,
+    borderLight: THEME_TOKENS.edge.light.faint,
 
     primary: semantic.light.primary,
     primaryForeground: semantic.light.primaryForeground,
 
-    destructive: COLORS.destructive,
-    destructiveForeground: '#ffffff',
+    destructive: semantic.light.destructive,
+    destructiveForeground: semantic.light.destructiveForeground,
+
+    layout,
   },
   dark: {
     background: semantic.dark.background,
     card: semantic.dark.card,
-    muted: semantic.dark.background,
-    overlay: 'rgba(0, 0, 0, 0.7)',
+    muted: semantic.dark.muted,
+    overlay: THEME_TOKENS.layout.modal.backdropDark,
 
     text: semantic.dark.foreground,
     textSecondary: semantic.dark.secondaryForeground,
@@ -99,8 +101,10 @@ export const COMPONENT_THEME = {
     primary: semantic.dark.primary,
     primaryForeground: semantic.dark.primaryForeground,
 
-    destructive: COLORS.destructive,
-    destructiveForeground: '#ffffff',
+    destructive: semantic.dark.destructive,
+    destructiveForeground: semantic.dark.destructiveForeground,
+
+    layout,
   },
 } as const;
 

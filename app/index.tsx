@@ -186,7 +186,7 @@ export default function WebViewScreen() {
                 <Icon
                   size={20}
                   color={isActive ? '#50A76C' : '#64748b'}
-                  strokeWidth={isActive ? 2.5 : 2}
+                  weight={isActive ? 'fill' : 'regular'}
                 />
                 <Text
                   style={[
