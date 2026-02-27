@@ -1,6 +1,7 @@
-﻿import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
+import { pretendard } from '@/lib/typography';
 import BaseSheetModal from '@/components/ui/BaseSheetModal';
 import AppActionButton from './AppActionButton';
 
@@ -41,9 +42,7 @@ export default function AppDialog({
       presentation="dialog"
       closeOnBackdropPress={!loading}
       backdropBlur
-      backdropIntensity={layout.modal.blurIntensity}
       contentStyle={styles.container}
-      overlayStyle={styles.overlay}
     >
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
@@ -51,17 +50,24 @@ export default function AppDialog({
 
         <View style={[styles.actions, !showCancel && styles.actionsSingle]}>
           {showCancel ? (
-            <AppActionButton label={cancelText} variant="ghost" disabled={loading} onPress={onClose} />
+            <AppActionButton
+              label={cancelText}
+              variant="ghost"
+              fullWidth
+              disabled={loading}
+              onPress={onClose}
+            />
           ) : null}
 
           {loading ? (
-            <View style={styles.loadingButton}>
+            <View style={[styles.loadingButton, showCancel && styles.loadingButtonFull]}>
               <ActivityIndicator color={confirmVariant === 'destructive' ? '#ffffff' : theme.primaryForeground} />
             </View>
           ) : (
             <AppActionButton
               label={confirmText}
               variant={confirmVariant === 'destructive' ? 'destructive' : 'primary'}
+              fullWidth={showCancel}
               onPress={() => void onConfirm?.()}
             />
           )}
@@ -73,11 +79,6 @@ export default function AppDialog({
 
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
-    overlay: {
-      backgroundColor: theme.isDark
-        ? `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`
-        : `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`,
-    },
     container: {
       width: '100%',
       maxWidth: layout.modal.maxWidth,
@@ -91,18 +92,19 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     title: {
       fontSize: layout.modal.titleSize,
-      fontWeight: '700',
+      ...pretendard(700),
       color: theme.text,
     },
     message: {
-      fontSize: layout.modal.messageSize,
-      lineHeight: layout.modal.messageLineHeight,
+      fontSize: 15,
+      lineHeight: 22,
+      ...pretendard(400),
       color: theme.textMuted,
     },
     actions: {
-      marginTop: layout.space[10],
       flexDirection: 'row',
-      justifyContent: 'flex-end',
+      justifyContent: 'space-between',
+      width: '100%',
       gap: layout.modal.buttonGap,
     },
     actionsSingle: {
@@ -116,5 +118,8 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
       justifyContent: 'center',
       backgroundColor: theme.primary,
       paddingHorizontal: layout.space[16],
+    },
+    loadingButtonFull: {
+      flex: 1,
     },
   });

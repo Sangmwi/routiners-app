@@ -6,8 +6,8 @@ import { useThemePreference } from '@/lib/theme-preference';
 // ============================================================================
 
 const { brand, semantic, layout } = THEME_TOKENS;
-const backdropLight = `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`;
-const backdropDark = `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`;
+const backdropLight = layout.modal.backdropLight;
+const backdropDark = layout.modal.backdropDark;
 
 export const COLORS = {
   primary: brand.green[500],

@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { useComponentTheme } from '@/lib/theme';
+import { pretendard } from '@/lib/typography';
 
 interface SheetInfoHeaderProps {
   title?: string;
@@ -38,12 +39,13 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     title: {
       fontSize: 17,
-      fontWeight: '600',
+      ...pretendard(600),
       color: theme.text,
       textAlign: 'center',
     },
     message: {
       fontSize: 14,
+      ...pretendard(400),
       color: theme.textMuted,
       textAlign: 'center',
       marginTop: 4,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import {
   Animated,
   Dimensions,
@@ -50,11 +50,21 @@ export default function BaseSheetModal({
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const hasStartedEnterRef = useRef(false);
+  const deferEnterUntilOnShow = Platform.OS === 'android' && presentation === 'dialog';
 
-  useEffect(() => {
-    if (!visible) {
+  const resetAnimatedState = useCallback(() => {
+    fadeAnim.setValue(0);
+    slideAnim.setValue(SCREEN_HEIGHT);
+    hasStartedEnterRef.current = false;
+  }, [fadeAnim, slideAnim]);
+
+  const startEnterAnimation = useCallback(() => {
+    if (hasStartedEnterRef.current) {
       return;
     }
+
+    hasStartedEnterRef.current = true;
 
     fadeAnim.setValue(0);
 
@@ -80,7 +90,18 @@ export default function BaseSheetModal({
     }
 
     Animated.parallel(enterAnimations).start();
-  }, [animationDuration, fadeAnim, presentation, slideAnim, visible, dialogAnimation]);
+  }, [animationDuration, fadeAnim, presentation, slideAnim]);
+
+  useEffect(() => {
+    if (!visible) {
+      resetAnimatedState();
+      return;
+    }
+
+    if (!deferEnterUntilOnShow) {
+      startEnterAnimation();
+    }
+  }, [deferEnterUntilOnShow, resetAnimatedState, startEnterAnimation, visible]);
 
   const overlayPlacement =
     presentation === 'sheet' ? styles.overlayBottom : styles.overlayCenter;
@@ -98,51 +119,72 @@ export default function BaseSheetModal({
     }
   };
 
+  const handleModalShow = () => {
+    if (deferEnterUntilOnShow && visible) {
+      startEnterAnimation();
+    }
+  };
+
+  const shouldRenderBlur = backdropBlur;
+  const useTranslucentSystemBars = Platform.OS === 'android' && presentation === 'sheet';
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="none"
-      statusBarTranslucent
-      navigationBarTranslucent
+      onShow={handleModalShow}
+      statusBarTranslucent={useTranslucentSystemBars}
+      navigationBarTranslucent={useTranslucentSystemBars}
       hardwareAccelerated={Platform.OS === 'android'}
       onRequestClose={onClose}
     >
-      <TouchableWithoutFeedback onPress={handleBackdropPress}>
-        <Animated.View
-          style={[
-            styles.overlay,
-            overlayPlacement,
-            { opacity: fadeAnim },
-            overlayStyle,
-          ]}
-        >
-          {backdropBlur ? (
-            <BlurView
-              intensity={backdropIntensity}
-              tint={theme.isDark ? 'dark' : 'light'}
-              style={styles.absoluteFill}
+      <View style={styles.modalHost}>
+        <TouchableWithoutFeedback onPress={handleBackdropPress}>
+          <Animated.View
+            style={[
+              styles.overlay,
+              overlayPlacement,
+              { opacity: fadeAnim },
+            ]}
+          >
+            {shouldRenderBlur ? (
+              <BlurView
+                intensity={backdropIntensity}
+                tint={theme.isDark ? 'dark' : 'light'}
+                experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
+                style={styles.absoluteFill}
+              />
+            ) : null}
+            <View
+              style={[
+                styles.absoluteFill,
+                { backgroundColor: theme.overlay },
+                overlayStyle,
+              ]}
             />
-          ) : null}
-          <View style={[styles.absoluteFill, { backgroundColor: theme.overlay }]} />
 
-          <TouchableWithoutFeedback>
-            <Animated.View style={[contentTransform, contentStyle]}>
-              {children}
-            </Animated.View>
-          </TouchableWithoutFeedback>
-        </Animated.View>
-      </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback>
+              <Animated.View style={[contentTransform, contentStyle]}>
+                {children}
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </Animated.View>
+        </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  modalHost: {
+    flex: 1,
+  },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
   },
   overlayBottom: {
     justifyContent: 'flex-end',

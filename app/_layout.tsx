@@ -1,17 +1,51 @@
 import 'react-native-reanimated';
 
+import { useEffect, useRef } from 'react';
 import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { Text, TextInput } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { ThemePreferenceProvider, useThemePreference } from '@/lib/theme-preference';
 
-// 네이티브 스플래시 자동 숨김 방지 (React 스플래시 렌더링 완료까지 유지)
+// Keep native splash visible until app is ready.
 SplashScreen.preventAutoHideAsync();
 
+function applyDefaultFontFamily(fontFamily: string) {
+  const apply = (component: { defaultProps?: { style?: unknown } }) => {
+    const previousStyle = component.defaultProps?.style;
+    component.defaultProps = {
+      ...component.defaultProps,
+      style: [{ fontFamily }, previousStyle].filter(Boolean),
+    };
+  };
+
+  apply(Text as unknown as { defaultProps?: { style?: unknown } });
+  apply(TextInput as unknown as { defaultProps?: { style?: unknown } });
+}
+
 export default function RootLayout() {
-  // hideAsync()는 index.tsx에서 React 스플래시 렌더링 완료 후 호출
-  // (흰 화면 깜빡임 방지)
+  const [fontsLoaded] = useFonts({
+    'Pretendard-400': require('../assets/fonts/Pretendard-Regular.ttf'),
+    'Pretendard-500': require('../assets/fonts/Pretendard-Medium.ttf'),
+    'Pretendard-600': require('../assets/fonts/Pretendard-SemiBold.ttf'),
+    'Pretendard-700': require('../assets/fonts/Pretendard-Bold.ttf'),
+  });
+  const hasAppliedDefaultFont = useRef(false);
+
+  useEffect(() => {
+    if (!fontsLoaded || hasAppliedDefaultFont.current) {
+      return;
+    }
+
+    applyDefaultFontFamily('Pretendard-400');
+    hasAppliedDefaultFont.current = true;
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <ThemePreferenceProvider>

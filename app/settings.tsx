@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type ComponentType, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ComponentType, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase/client';
 import { getInitialUrl } from '@/lib/webview';
 import { useComponentTheme } from '@/lib/theme';
 import { useThemePreference } from '@/lib/theme-preference';
+import { pretendard } from '@/lib/typography';
 
 type Accessory = 'chevron' | 'toggle' | ReactNode;
 
@@ -17,7 +18,6 @@ type SettingsRowItem = {
   label: string;
   icon: ComponentType<{ size?: number; color?: string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' }>;
   description?: string;
-  destructive?: boolean;
   accessory?: Accessory;
   toggleValue?: boolean;
   onToggle?: (next: boolean) => void;
@@ -36,7 +36,6 @@ type DialogConfig = {
   confirmText?: string;
   cancelText?: string;
   showCancel?: boolean;
-  destructive?: boolean;
   onConfirm?: () => void | Promise<void>;
 };
 
@@ -59,7 +58,7 @@ export default function SettingsScreen() {
   const [dialogConfig, setDialogConfig] = useState<DialogConfig | null>(null);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
 
-  const openDialog = (config: DialogConfig) => setDialogConfig(config);
+  const openDialog = useCallback((config: DialogConfig) => setDialogConfig(config), []);
 
   const closeDialog = () => {
     if (!isDialogLoading) setDialogConfig(null);
@@ -80,16 +79,16 @@ export default function SettingsScreen() {
     }
   };
 
-  const showPreparingDialog = () => {
+  const showPreparingDialog = useCallback(() => {
     openDialog({
       title: '준비 중',
       message: '준비 중인 기능입니다.',
       confirmText: '확인',
       showCancel: false,
     });
-  };
+  }, [openDialog]);
 
-  const runLogout = async () => {
+  const runLogout = useCallback(async () => {
     setIsLoading(true);
     try {
       await supabase.auth.signOut({ scope: 'local' });
@@ -97,9 +96,9 @@ export default function SettingsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const runWithdraw = async () => {
+  const runWithdraw = useCallback(async () => {
     setIsLoading(true);
     try {
       const {
@@ -133,7 +132,7 @@ export default function SettingsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [openDialog, router]);
 
   const groups = useMemo<SettingsGroup[]>(
     () => [
@@ -191,14 +190,12 @@ export default function SettingsScreen() {
             key: 'withdraw',
             icon: AppIcons.userMinus,
             label: '회원 탈퇴',
-            destructive: true,
             onPress: () =>
               openDialog({
                 title: '회원 탈퇴',
                 message: '정말 탈퇴하시겠습니까? 복구할 수 없습니다.',
                 confirmText: '탈퇴',
                 cancelText: '취소',
-                destructive: true,
                 onConfirm: runWithdraw,
               }),
           },
@@ -225,7 +222,19 @@ export default function SettingsScreen() {
         ],
       },
     ],
-    [mode, notificationEnabled, setMode, theme.text, theme.textMuted, theme.card, theme.isDark],
+    [
+      mode,
+      notificationEnabled,
+      setMode,
+      theme.text,
+      theme.textMuted,
+      theme.card,
+      theme.isDark,
+      showPreparingDialog,
+      openDialog,
+      runLogout,
+      runWithdraw,
+    ],
   );
 
   return (
@@ -248,7 +257,6 @@ export default function SettingsScreen() {
                   icon={row.icon}
                   label={row.label}
                   description={row.description}
-                  destructive={row.destructive}
                   disabled={isLoading}
                   rightAccessory={row.accessory}
                   toggleValue={row.toggleValue}
@@ -271,7 +279,6 @@ export default function SettingsScreen() {
         confirmText={dialogConfig?.confirmText}
         cancelText={dialogConfig?.cancelText}
         showCancel={dialogConfig?.showCancel}
-        destructive={dialogConfig?.destructive}
         loading={isDialogLoading}
         onClose={closeDialog}
         onConfirm={handleDialogConfirm}
@@ -305,7 +312,7 @@ function ThemeModeSelector({
             onPress={() => onChange(option.mode)}
             style={[styles.themeButton, selected && { backgroundColor: cardColor }]}
           >
-            <Text style={[styles.themeButtonText, { color: selected ? textColor : mutedColor }]}>
+            <Text style={[styles.themeButtonText, { color: selected ? textColor : mutedColor }]}> 
               {option.label}
             </Text>
           </Pressable>
@@ -334,7 +341,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: layout.typography.title,
-    fontWeight: '700',
+    ...pretendard(700),
   },
   placeholder: {
     width: 44,
@@ -357,13 +364,13 @@ const styles = StyleSheet.create({
   },
   themeButtonText: {
     fontSize: layout.typography.caption,
-    fontWeight: '600',
+    ...pretendard(600),
   },
   versionText: {
     textAlign: 'center',
     fontSize: layout.typography.caption,
+    ...pretendard(400),
     paddingTop: layout.space[8],
     paddingBottom: layout.space[8],
   },
 });
-

@@ -1,8 +1,9 @@
-﻿import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 import { AppIcons } from '@/lib/icon';
+import { pretendard } from '@/lib/typography';
 
 interface IconProps {
   size?: number;
@@ -119,12 +120,13 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     label: {
       fontSize: layout.typography.body,
-      fontWeight: '600',
+      ...pretendard(500),
       color: theme.text,
     },
     description: {
       marginTop: 2,
       fontSize: layout.typography.caption,
+      ...pretendard(400),
       color: theme.textMuted,
     },
     right: {

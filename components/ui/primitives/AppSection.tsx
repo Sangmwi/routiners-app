@@ -1,7 +1,8 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
+import { pretendard } from '@/lib/typography';
 import AppSurface from './AppSurface';
 
 interface AppSectionProps {
@@ -33,7 +34,7 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     title: {
       paddingHorizontal: 4,
       fontSize: layout.section.titleSize,
-      fontWeight: '600',
+      ...pretendard(500),
       color: theme.textMuted,
     },
   });

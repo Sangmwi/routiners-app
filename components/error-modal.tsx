@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { AppActionButton } from '@/components/ui';
 import { useComponentTheme } from '@/lib/theme';
+import { pretendard } from '@/lib/typography';
 import BaseSheetModal from '@/components/ui/BaseSheetModal';
 
 export interface WebViewError {
@@ -50,9 +51,7 @@ export function ErrorModal({ visible, onClose, onRetry, error }: ErrorModalProps
       onClose={onClose}
       presentation="dialog"
       backdropBlur
-      backdropIntensity={layout.modal.blurIntensity}
       contentStyle={styles.container}
-      overlayStyle={styles.overlay}
     >
       <Text style={styles.title}>{content.title}</Text>
       <Text style={styles.message}>{content.message}</Text>
@@ -84,11 +83,6 @@ export function ErrorModal({ visible, onClose, onRetry, error }: ErrorModalProps
 
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
-    overlay: {
-      backgroundColor: theme.isDark
-        ? `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`
-        : `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`,
-    },
     container: {
       width: '100%',
       maxWidth: layout.modal.maxWidth,
@@ -100,12 +94,13 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     title: {
       fontSize: 17,
-      fontWeight: '700',
+      ...pretendard(700),
       color: theme.text,
     },
     message: {
       fontSize: 15,
       lineHeight: 22,
+      ...pretendard(400),
       color: theme.textMuted,
     },
     detailToggle: {
@@ -113,6 +108,7 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     detailToggleText: {
       fontSize: 13,
+      ...pretendard(400),
       color: theme.textMuted,
       textDecorationLine: 'underline',
     },

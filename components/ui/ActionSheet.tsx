@@ -1,7 +1,8 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
+import { pretendard } from '@/lib/typography';
 import BaseSheetModal from './BaseSheetModal';
 import SheetInfoHeader from './SheetInfoHeader';
 
@@ -54,9 +55,7 @@ export default function ActionSheet({
       onClose={onClose}
       presentation="sheet"
       backdropBlur
-      backdropIntensity={layout.modal.blurIntensity}
       contentStyle={styles.container}
-      overlayStyle={styles.overlay}
     >
       <View style={styles.handleContainer}>
         <View style={styles.handle} />
@@ -102,11 +101,6 @@ export default function ActionSheet({
 
 const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
   StyleSheet.create({
-    overlay: {
-      backgroundColor: theme.isDark
-        ? `rgba(0, 0, 0, ${layout.modal.backdropAlphaDark})`
-        : `rgba(0, 0, 0, ${layout.modal.backdropAlphaLight})`,
-    },
     container: {
       backgroundColor: theme.card,
       borderTopLeftRadius: layout.radius.x2,
@@ -133,13 +127,14 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     title: {
       fontSize: 17,
-      fontWeight: '700',
+      ...pretendard(700),
       color: theme.text,
       textAlign: 'center',
     },
     message: {
       fontSize: 14,
       lineHeight: 20,
+      ...pretendard(400),
       color: theme.textMuted,
       textAlign: 'center',
       marginTop: 4,
@@ -166,7 +161,7 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     optionText: {
       fontSize: 17,
-      fontWeight: '600',
+      ...pretendard(600),
     },
     optionDivider: {
       position: 'absolute',
@@ -187,7 +182,7 @@ const createStyles = (theme: ReturnType<typeof useComponentTheme>) =>
     },
     cancelText: {
       fontSize: 17,
-      fontWeight: '700',
+      ...pretendard(700),
       color: theme.text,
     },
   });
