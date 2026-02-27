@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+import { NativeBottomNav } from '@/components/common/native-bottom-nav';
 import { ErrorModal } from '@/components/error-modal';
 import { SplashScreen } from '@/components/splash-screen';
 import {
@@ -21,7 +22,7 @@ import {
 } from '@/hooks';
 import { useTheme } from '@/lib/theme';
 import { useThemePreference } from '@/lib/theme-preference';
-import { NATIVE_TAB_ITEMS } from '@/lib/navigation/native-tab-config';
+import { NATIVE_TAB_STYLE } from '@/lib/navigation/native-tab-config';
 import {
   CHROME_USER_AGENT,
   DEFAULT_ROUTE_INFO,
@@ -30,8 +31,6 @@ import {
   WebViewBridge,
   type RouteInfo,
 } from '@/lib/webview';
-
-const NATIVE_TAB_HEIGHT = 64;
 
 function getActiveTab(path: string): (typeof TAB_ROUTES)[number] {
   if (path === '/') return '/';
@@ -142,7 +141,7 @@ export default function WebViewScreen() {
       <View
         style={[
           styles.webviewHost,
-          showNativeTabs ? { marginBottom: NATIVE_TAB_HEIGHT + insets.bottom } : null,
+          showNativeTabs ? { marginBottom: NATIVE_TAB_STYLE.height + insets.bottom } : null,
         ]}
       >
         {isReady && (
@@ -162,48 +161,7 @@ export default function WebViewScreen() {
         )}
       </View>
 
-      {showNativeTabs && (
-        <View
-          style={[
-            styles.nativeTabBar,
-            {
-              backgroundColor: theme.background,
-              borderTopColor: 'rgba(148, 163, 184, 0.25)',
-              paddingBottom: insets.bottom,
-              height: NATIVE_TAB_HEIGHT + insets.bottom,
-            },
-          ]}
-        >
-          {NATIVE_TAB_ITEMS.map((item) => {
-            const isActive = activeTab === item.path;
-            const Icon = item.icon;
-            return (
-              <Pressable
-                key={item.path}
-                onPress={() => handleTabPress(item.path)}
-                style={styles.tabButton}
-              >
-                <Icon
-                  size={20}
-                  color={isActive ? '#50A76C' : '#64748b'}
-                  weight={isActive ? 'fill' : 'regular'}
-                />
-                <Text
-                  style={[
-                    styles.tabLabel,
-                    {
-                      color: isActive ? '#50A76C' : '#64748b',
-                      fontWeight: isActive ? '700' : '500',
-                    },
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      )}
+      {showNativeTabs && <NativeBottomNav activeTab={activeTab} onTabPress={handleTabPress} />}
 
       {showSplash && (
         <Animated.View
@@ -241,25 +199,5 @@ const styles = StyleSheet.create({
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-  },
-  nativeTabBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    height: NATIVE_TAB_HEIGHT,
-  },
-  tabLabel: {
-    fontSize: 12,
-    letterSpacing: 0.1,
   },
 });

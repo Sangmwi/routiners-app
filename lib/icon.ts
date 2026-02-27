@@ -16,7 +16,7 @@
   ShieldCheck,
   SignOut,
   Ticket,
-  User,
+  UserCircle,
   UserMinus,
   UsersThree,
 } from 'phosphor-react-native';
@@ -26,7 +26,7 @@ export const AppIcons = {
   routine: Calendar,
   stats: ChartBar,
   community: UsersThree,
-  profile: User,
+  profile: UserCircle,
 
   palette: Palette,
   bell: Bell,
