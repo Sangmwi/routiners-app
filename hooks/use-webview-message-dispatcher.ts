@@ -1,5 +1,6 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import type { WebViewMessageEvent } from 'react-native-webview';
+import { WebToAppMessageSchema } from '@sangmwi/shared-contracts';
 import type { SplashStage } from '@/components/splash-screen';
 import type { RouteInfo, WebToAppMessage } from '@/lib/webview';
 
@@ -19,10 +20,43 @@ interface UseWebViewMessageDispatcherOptions {
   handleWebMessage: (message: WebToAppMessage) => void;
 }
 
+const STRICT_BRIDGE_VALIDATION =
+  process.env.EXPO_PUBLIC_STRICT_BRIDGE_VALIDATION !== 'false';
+
+function getMessageTypeHint(raw: string): string | null {
+  try {
+    const data = JSON.parse(raw) as { type?: unknown };
+    return typeof data.type === 'string' ? data.type : null;
+  } catch {
+    return null;
+  }
+}
+
 function parseWebMessage(raw: string): WebToAppMessage | null {
   try {
-    return JSON.parse(raw) as WebToAppMessage;
+    const parsed = JSON.parse(raw);
+
+    if (!STRICT_BRIDGE_VALIDATION) {
+      return parsed as WebToAppMessage;
+    }
+
+    const result = WebToAppMessageSchema.safeParse(parsed);
+    if (!result.success) {
+      console.warn('[WebViewBridge][app] Dropped invalid inbound message', {
+        type: getMessageTypeHint(raw),
+        rawLength: raw.length,
+        reason: result.error.issues[0]?.message,
+      });
+      return null;
+    }
+
+    return result.data as WebToAppMessage;
   } catch {
+    if (STRICT_BRIDGE_VALIDATION) {
+      console.warn('[WebViewBridge][app] Dropped malformed inbound JSON', {
+        rawLength: raw.length,
+      });
+    }
     return null;
   }
 }

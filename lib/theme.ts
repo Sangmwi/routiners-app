@@ -1,68 +1,61 @@
-import { useColorScheme } from 'react-native';
+﻿import { useColorScheme } from 'react-native';
+import { THEME_TOKENS } from '@sangmwi/shared-contracts';
 
 // ============================================================================
 // WebView Theme Configuration
 // ============================================================================
 
-/**
- * 공통 색상 (웹 globals.css와 일치)
- */
+const { brand, semantic } = THEME_TOKENS;
+
 export const COLORS = {
-  // Primary (Green Brand)
-  primary: '#50A76C', // green-500 (웹 메인 브랜드)
-  primaryLight: '#5fc07f', // green-400 (다크모드용)
-  primaryDark: '#328a4d', // green-600
-  primaryDarker: '#1B6523', // green-700
-  primaryMedium: '#b9eac8', // green-200
-  primarySubtle: '#dbf5e2', // green-100
-  primaryDarkLight: '#334155', // slate-700
-  primaryDarkMedium: '#1e293b', // slate-800
-  primaryDarkSubtle: '#0f172a', // slate-900
+  primary: brand.green[500],
+  primaryLight: brand.green[400],
+  primaryDark: brand.green[600],
+  primaryDarker: brand.green[700],
+  primaryMedium: brand.green[200],
+  primarySubtle: brand.green[100],
+  primaryDarkLight: brand.slate[700],
+  primaryDarkMedium: brand.slate[800],
+  primaryDarkSubtle: brand.slate[900],
 
-  // Green Scale
-  green50: '#f0faf3',
-  green100: '#dbf5e2',
-  green200: '#b9eac8',
-  green300: '#88d9a2',
-  green400: '#5fc07f',
-  green500: '#50A76C',
-  green600: '#328a4d',
-  green700: '#1B6523',
-  green800: '#1a5421',
-  green900: '#17451c',
-  green950: '#0a2610',
+  green50: brand.green[50],
+  green100: brand.green[100],
+  green200: brand.green[200],
+  green300: brand.green[300],
+  green400: brand.green[400],
+  green500: brand.green[500],
+  green600: brand.green[600],
+  green700: brand.green[700],
+  green800: brand.green[800],
+  green900: brand.green[900],
+  green950: brand.green[950],
 
-  // Slate Scale (다크모드용)
-  slate50: '#f8fafc',
-  slate100: '#f1f5f9',
-  slate200: '#e2e8f0',
-  slate400: '#94a3b8',
-  slate500: '#64748b',
-  slate700: '#334155',
-  slate800: '#1e293b',
-  slate900: '#0f172a',
+  slate50: brand.slate[50],
+  slate100: brand.slate[100],
+  slate200: brand.slate[200],
+  slate400: brand.slate[400],
+  slate500: brand.slate[500],
+  slate700: brand.slate[700],
+  slate800: brand.slate[800],
+  slate900: brand.slate[900],
 
-  // Semantic
-  textMuted: '#94a3b8', // slate-400
-  textMutedDark: '#64748b', // slate-500
-  destructive: '#ef4444', // red-500
-  destructiveDark: '#dc2626', // red-600
+  textMuted: semantic.dark.mutedForeground,
+  textMutedDark: semantic.light.mutedForeground,
+  destructive: '#ef4444',
+  destructiveDark: '#dc2626',
 } as const;
 
-/**
- * 웹 테마와 일치하는 네이티브 색상
- */
 export const WEBVIEW_THEME = {
   light: {
-    background: '#f3f6f3', // 웹 라이트모드 배경
+    background: semantic.light.background,
     statusBar: 'dark' as const,
-    text: '#0f172a', // slate-900
+    text: brand.slate[900],
     textMuted: COLORS.textMutedDark,
   },
   dark: {
-    background: '#0f172a', // 웹 다크모드 배경 (slate-900)
+    background: semantic.dark.background,
     statusBar: 'light' as const,
-    text: '#f8fafc', // slate-50
+    text: brand.slate[50],
     textMuted: COLORS.textMuted,
   },
 } as const;
@@ -70,78 +63,55 @@ export const WEBVIEW_THEME = {
 export type ThemeMode = keyof typeof WEBVIEW_THEME;
 export type Theme = (typeof WEBVIEW_THEME)[ThemeMode];
 
-/**
- * 컴포넌트용 확장 테마 (웹 디자인 시스템과 일치)
- */
 export const COMPONENT_THEME = {
   light: {
-    // Backgrounds
-    background: '#f3f6f3',
-    card: '#ffffff',
+    background: semantic.light.background,
+    card: semantic.light.card,
     muted: '#e8f4eb',
     overlay: 'rgba(0, 0, 0, 0.5)',
 
-    // Text
-    text: '#0a2610', // green-950
-    textSecondary: '#328a4d', // green-600
-    textMuted: '#64748b', // slate-500
+    text: semantic.light.foreground,
+    textSecondary: brand.green[600],
+    textMuted: brand.slate[500],
 
-    // Borders
-    border: '#b9eac8', // green-200
-    borderLight: '#dbf5e2', // green-100
+    border: brand.green[200],
+    borderLight: brand.green[100],
 
-    // Primary
-    primary: '#50A76C',
-    primaryForeground: '#ffffff',
+    primary: semantic.light.primary,
+    primaryForeground: semantic.light.primaryForeground,
 
-    // Destructive
-    destructive: '#ef4444',
+    destructive: COLORS.destructive,
     destructiveForeground: '#ffffff',
   },
   dark: {
-    // Backgrounds
-    background: '#0f172a', // slate-900
-    card: '#1e293b', // slate-800
-    muted: '#0f172a', // slate-900
+    background: semantic.dark.background,
+    card: semantic.dark.card,
+    muted: semantic.dark.background,
     overlay: 'rgba(0, 0, 0, 0.7)',
 
-    // Text
-    text: '#f1f5f9', // slate-100
-    textSecondary: '#e2e8f0', // slate-200
-    textMuted: '#94a3b8', // slate-400
+    text: semantic.dark.foreground,
+    textSecondary: semantic.dark.secondaryForeground,
+    textMuted: semantic.dark.mutedForeground,
 
-    // Borders
-    border: '#334155', // slate-700
-    borderLight: '#1e293b', // slate-800
+    border: semantic.dark.border,
+    borderLight: semantic.dark.card,
 
-    // Primary
-    primary: '#5fc07f', // green-400
-    primaryForeground: '#0a2610', // green-950
+    primary: semantic.dark.primary,
+    primaryForeground: semantic.dark.primaryForeground,
 
-    // Destructive
-    destructive: '#ef4444',
+    destructive: COLORS.destructive,
     destructiveForeground: '#ffffff',
   },
 } as const;
 
 export type ComponentTheme = (typeof COMPONENT_THEME)[ThemeMode];
 
-// ============================================================================
-// Hooks
-// ============================================================================
-
-/**
- * 현재 시스템 테마에 맞는 WebView 테마 반환
- */
 export function useTheme(): Theme {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   return isDark ? WEBVIEW_THEME.dark : WEBVIEW_THEME.light;
 }
 
-/**
- * 현재 시스템 테마에 맞는 컴포넌트 테마 반환
- */
 export function useComponentTheme(): ComponentTheme & { isDark: boolean } {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
