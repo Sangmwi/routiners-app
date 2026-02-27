@@ -118,4 +118,11 @@ export const WebViewBridge = {
   setThemeMode: (webViewRef: React.RefObject<WebView | null>, mode: ThemeMode) => {
     sendCommand(webViewRef, { type: 'SET_THEME_MODE', mode });
   },
+
+  /** 네이티브 하단 safe area 값을 CSS 변수로 주입 (Android env() 부정확 보정) */
+  setNativeBottom: (webViewRef: React.RefObject<WebView | null>, bottomPx: number) => {
+    webViewRef.current?.injectJavaScript(
+      `document.documentElement.style.setProperty('--native-bottom','${bottomPx}px');true;`
+    );
+  },
 };

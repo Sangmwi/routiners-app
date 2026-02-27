@@ -32,14 +32,14 @@ export function NativeBottomNav({ activeTab, onTabPress }: NativeBottomNavProps)
           <Pressable key={item.path} onPress={() => onTabPress(item.path)} style={styles.tabButton}>
             <Icon
               size={NATIVE_TAB_STYLE.iconSize}
-              color={isActive ? NATIVE_TAB_STYLE.activeColor : theme.textMuted}
+              color={isActive ? theme.text : theme.textMuted}
               weight={isActive ? NATIVE_TAB_STYLE.activeWeight : NATIVE_TAB_STYLE.inactiveWeight}
             />
             <Text
               style={[
                 styles.tabLabel,
                 {
-                  color: isActive ? NATIVE_TAB_STYLE.activeColor : theme.textMuted,
+                  color: isActive ? theme.text : theme.textMuted,
                   fontWeight: isActive ? '700' : '500',
                 },
               ]}

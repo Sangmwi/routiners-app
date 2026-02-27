@@ -19,7 +19,6 @@ export const NATIVE_TAB_STYLE = {
   iconSize: 24,
   labelSize: 12,
   labelLetterSpacing: 0.1,
-  activeColor: '#50A76C',
   activeWeight: 'fill' as const,
   inactiveWeight: 'regular' as const,
 };

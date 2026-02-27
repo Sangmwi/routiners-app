@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeBottomNav } from '@/components/common/native-bottom-nav';
 import { ErrorModal } from '@/components/error-modal';
 import { SplashScreen } from '@/components/splash-screen';
@@ -22,7 +22,6 @@ import {
 } from '@/hooks';
 import { useTheme } from '@/lib/theme';
 import { useThemePreference } from '@/lib/theme-preference';
-import { NATIVE_TAB_STYLE } from '@/lib/navigation/native-tab-config';
 import {
   CHROME_USER_AGENT,
   DEFAULT_ROUTE_INFO,
@@ -41,8 +40,8 @@ function getActiveTab(path: string): (typeof TAB_ROUTES)[number] {
 export default function WebViewScreen() {
   const theme = useTheme();
   const { mode } = useThemePreference();
-  const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { bottom: bottomInset } = useSafeAreaInsets();
 
   const webViewRef = useRef<WebView>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
@@ -130,20 +129,10 @@ export default function WebViewScreen() {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top, backgroundColor: theme.background },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar style={theme.statusBar} />
 
-      <View
-        style={[
-          styles.webviewHost,
-          showNativeTabs ? { marginBottom: NATIVE_TAB_STYLE.height + insets.bottom } : null,
-        ]}
-      >
+      <View style={styles.webviewHost}>
         {isReady && (
           <WebView
             ref={webViewRef}
@@ -154,14 +143,17 @@ export default function WebViewScreen() {
             onMessage={handleMessage}
             onShouldStartLoadWithRequest={handleLoadRequest}
             onNavigationStateChange={handleNavigation}
-            onLoadEnd={() => setWebViewLoaded(true)}
+            onLoadEnd={() => {
+              setWebViewLoaded(true);
+              WebViewBridge.setNativeBottom(webViewRef, bottomInset);
+            }}
             onError={handleWebViewError}
             onHttpError={handleHttpError}
           />
         )}
       </View>
 
-      {showNativeTabs && <NativeBottomNav activeTab={activeTab} onTabPress={handleTabPress} />}
+      {showNativeTabs && !hasOverlay && <NativeBottomNav activeTab={activeTab} onTabPress={handleTabPress} />}
 
       {showSplash && (
         <Animated.View
