@@ -1,5 +1,5 @@
-﻿import { useColorScheme } from 'react-native';
 import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { useThemePreference } from '@/lib/theme-preference';
 
 // ============================================================================
 // WebView Theme Configuration
@@ -107,16 +107,16 @@ export const COMPONENT_THEME = {
 export type ComponentTheme = (typeof COMPONENT_THEME)[ThemeMode];
 
 export function useTheme(): Theme {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  return isDark ? WEBVIEW_THEME.dark : WEBVIEW_THEME.light;
+  const { resolvedMode } = useThemePreference();
+  return resolvedMode === 'dark' ? WEBVIEW_THEME.dark : WEBVIEW_THEME.light;
 }
 
 export function useComponentTheme(): ComponentTheme & { isDark: boolean } {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { resolvedMode } = useThemePreference();
+  const isDark = resolvedMode === 'dark';
   return {
     ...(isDark ? COMPONENT_THEME.dark : COMPONENT_THEME.light),
     isDark,
   };
 }
+

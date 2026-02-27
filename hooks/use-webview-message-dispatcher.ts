@@ -17,6 +17,7 @@ interface UseWebViewMessageDispatcherOptions {
     requestId: ImagePickerRequest['requestId'];
     source: ImagePickerRequest['source'];
   }) => void | Promise<void>;
+  handleOpenNativeSettings: () => void;
   handleWebMessage: (message: WebToAppMessage) => void;
 }
 
@@ -69,6 +70,7 @@ export function useWebViewMessageDispatcher({
   handleLogout,
   handleNativeLogin,
   handleImagePickerRequest,
+  handleOpenNativeSettings,
   handleWebMessage,
 }: UseWebViewMessageDispatcherOptions) {
   const handleMessage = useCallback(
@@ -92,6 +94,9 @@ export function useWebViewMessageDispatcher({
         case 'REQUEST_LOGIN':
           void handleNativeLogin();
           break;
+        case 'OPEN_NATIVE_SETTINGS':
+          handleOpenNativeSettings();
+          break;
         case 'REQUEST_IMAGE_PICKER':
           void handleImagePickerRequest({
             requestId: message.requestId,
@@ -113,6 +118,7 @@ export function useWebViewMessageDispatcher({
       handleImagePickerRequest,
       handleLogout,
       handleNativeLogin,
+      handleOpenNativeSettings,
       handleWebMessage,
       setCanHideSplash,
       setHasOverlay,

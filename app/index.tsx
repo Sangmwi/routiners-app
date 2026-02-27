@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ErrorModal } from '@/components/error-modal';
@@ -19,16 +20,30 @@ import {
   useWebViewNavigation,
 } from '@/hooks';
 import { useTheme } from '@/lib/theme';
+import { useThemePreference } from '@/lib/theme-preference';
+import { NATIVE_TAB_ITEMS } from '@/lib/navigation/native-tab-config';
 import {
   CHROME_USER_AGENT,
   DEFAULT_ROUTE_INFO,
+  TAB_ROUTES,
   WEBVIEW_BASE_PROPS,
+  WebViewBridge,
   type RouteInfo,
 } from '@/lib/webview';
 
+const NATIVE_TAB_HEIGHT = 64;
+
+function getActiveTab(path: string): (typeof TAB_ROUTES)[number] {
+  if (path === '/') return '/';
+  const matched = TAB_ROUTES.find((tab) => tab !== '/' && (path === tab || path.startsWith(`${tab}/`)));
+  return matched ?? '/';
+}
+
 export default function WebViewScreen() {
   const theme = useTheme();
+  const { mode } = useThemePreference();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const webViewRef = useRef<WebView>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
@@ -74,6 +89,7 @@ export default function WebViewScreen() {
     handleLogout,
     handleNativeLogin,
     handleImagePickerRequest,
+    handleOpenNativeSettings: () => router.push('/settings'),
     handleWebMessage,
   });
 
@@ -82,6 +98,10 @@ export default function WebViewScreen() {
       setSplashStage('WEBVIEW_LOAD');
     }
   }, [isReady, setSplashStage]);
+
+  useEffect(() => {
+    WebViewBridge.setThemeMode(webViewRef, mode);
+  }, [mode]);
 
   useKeyboardBridge({ webViewRef, isReady });
 
@@ -95,6 +115,21 @@ export default function WebViewScreen() {
       webViewRef,
     });
 
+  const showNativeTabs = routeInfo.isTabRoute && routeInfo.path !== '/login';
+  const activeTab = getActiveTab(routeInfo.path);
+
+  const handleTabPress = (path: (typeof TAB_ROUTES)[number]) => {
+    if (activeTab === path) return;
+    WebViewBridge.navigateTo(webViewRef, path);
+    setRouteInfo((prev) => ({
+      ...prev,
+      path,
+      isTabRoute: true,
+      isHome: path === '/',
+      canGoBack: path !== '/',
+    }));
+  };
+
   return (
     <View
       style={[
@@ -104,20 +139,70 @@ export default function WebViewScreen() {
     >
       <StatusBar style={theme.statusBar} />
 
-      {isReady && (
-        <WebView
-          ref={webViewRef}
-          source={{ uri: url }}
-          style={[styles.webview, { backgroundColor: theme.background }]}
-          userAgent={CHROME_USER_AGENT}
-          {...WEBVIEW_BASE_PROPS}
-          onMessage={handleMessage}
-          onShouldStartLoadWithRequest={handleLoadRequest}
-          onNavigationStateChange={handleNavigation}
-          onLoadEnd={() => setWebViewLoaded(true)}
-          onError={handleWebViewError}
-          onHttpError={handleHttpError}
-        />
+      <View
+        style={[
+          styles.webviewHost,
+          showNativeTabs ? { marginBottom: NATIVE_TAB_HEIGHT + insets.bottom } : null,
+        ]}
+      >
+        {isReady && (
+          <WebView
+            ref={webViewRef}
+            source={{ uri: url }}
+            style={[styles.webview, { backgroundColor: theme.background }]}
+            userAgent={CHROME_USER_AGENT}
+            {...WEBVIEW_BASE_PROPS}
+            onMessage={handleMessage}
+            onShouldStartLoadWithRequest={handleLoadRequest}
+            onNavigationStateChange={handleNavigation}
+            onLoadEnd={() => setWebViewLoaded(true)}
+            onError={handleWebViewError}
+            onHttpError={handleHttpError}
+          />
+        )}
+      </View>
+
+      {showNativeTabs && (
+        <View
+          style={[
+            styles.nativeTabBar,
+            {
+              backgroundColor: theme.background,
+              borderTopColor: 'rgba(148, 163, 184, 0.25)',
+              paddingBottom: insets.bottom,
+              height: NATIVE_TAB_HEIGHT + insets.bottom,
+            },
+          ]}
+        >
+          {NATIVE_TAB_ITEMS.map((item) => {
+            const isActive = activeTab === item.path;
+            const Icon = item.icon;
+            return (
+              <Pressable
+                key={item.path}
+                onPress={() => handleTabPress(item.path)}
+                style={styles.tabButton}
+              >
+                <Icon
+                  size={20}
+                  color={isActive ? '#50A76C' : '#64748b'}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    {
+                      color: isActive ? '#50A76C' : '#64748b',
+                      fontWeight: isActive ? '700' : '500',
+                    },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       )}
 
       {showSplash && (
@@ -151,7 +236,30 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
   },
+  webviewHost: {
+    flex: 1,
+  },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
+  },
+  nativeTabBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    height: NATIVE_TAB_HEIGHT,
+  },
+  tabLabel: {
+    fontSize: 12,
+    letterSpacing: 0.1,
   },
 });

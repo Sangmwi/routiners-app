@@ -1,5 +1,6 @@
 import { WebView } from 'react-native-webview';
 import type { AppToWebMessage } from './types';
+import type { ThemeMode } from '@sangmwi/shared-contracts';
 
 // ============================================================================
 // Bridge Utilities
@@ -112,5 +113,9 @@ export const WebViewBridge = {
   sendKeyboardHide: (webViewRef: React.RefObject<WebView | null>) => {
     sendCommand(webViewRef, { type: 'KEYBOARD_HIDE' });
   },
-};
 
+  /** 웹 테마 모드 설정 */
+  setThemeMode: (webViewRef: React.RefObject<WebView | null>, mode: ThemeMode) => {
+    sendCommand(webViewRef, { type: 'SET_THEME_MODE', mode });
+  },
+};
