@@ -46,6 +46,7 @@ export default function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo>(DEFAULT_ROUTE_INFO);
   const [hasOverlay, setHasOverlay] = useState(false);
+  const [coversNav, setCoversNav] = useState(false);
   const {
     splashStage,
     setSplashStage,
@@ -82,6 +83,7 @@ export default function WebViewScreen() {
   const { handleMessage } = useWebViewMessageDispatcher({
     setRouteInfo,
     setHasOverlay,
+    setCoversNav,
     setCanHideSplash,
     setSplashStage,
     handleLogout,
@@ -153,7 +155,7 @@ export default function WebViewScreen() {
         )}
       </View>
 
-      {showNativeTabs && !hasOverlay && <NativeBottomNav activeTab={activeTab} onTabPress={handleTabPress} />}
+      {showNativeTabs && !coversNav && <NativeBottomNav activeTab={activeTab} onTabPress={handleTabPress} />}
 
       {showSplash && (
         <Animated.View
