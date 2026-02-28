@@ -1,4 +1,4 @@
-import { IS_DEV_ANDROID } from './constants';
+import { IS_DEV_ANDROID, TAB_ROUTES } from './constants';
 
 // ============================================================================
 // URL Transformation
@@ -20,4 +20,16 @@ export const extractPath = (url: string): string => {
     return '/';
   }
 };
+
+// ============================================================================
+// Tab Navigation
+// ============================================================================
+
+/** 현재 경로에 해당하는 활성 탭 라우트를 반환 */
+export function getActiveTab(path: string): (typeof TAB_ROUTES)[number] {
+  if (path === '/') return '/';
+  return (
+    TAB_ROUTES.find((tab) => tab !== '/' && (path === tab || path.startsWith(`${tab}/`))) ?? '/'
+  );
+}
 

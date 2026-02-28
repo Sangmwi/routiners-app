@@ -9,6 +9,13 @@ import {
 } from '@/lib/webview';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** 오버레이 goBack 중복 방지 쿨다운 (ms) */
+const OVERLAY_BACK_COOLDOWN_MS = 300;
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -55,7 +62,7 @@ export const useSmartBackHandler = ({
     if (hasOverlay) {
       if (overlayBackCooldownRef.current) return true;
       overlayBackCooldownRef.current = true;
-      setTimeout(() => { overlayBackCooldownRef.current = false; }, 300);
+      setTimeout(() => { overlayBackCooldownRef.current = false; }, OVERLAY_BACK_COOLDOWN_MS);
       webViewRef.current?.goBack();
       return true;
     }

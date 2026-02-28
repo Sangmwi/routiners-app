@@ -25,17 +25,12 @@ import { useThemePreference } from '@/lib/theme-preference';
 import {
   CHROME_USER_AGENT,
   DEFAULT_ROUTE_INFO,
+  getActiveTab,
   TAB_ROUTES,
   WEBVIEW_BASE_PROPS,
   WebViewBridge,
   type RouteInfo,
 } from '@/lib/webview';
-
-function getActiveTab(path: string): (typeof TAB_ROUTES)[number] {
-  if (path === '/') return '/';
-  const matched = TAB_ROUTES.find((tab) => tab !== '/' && (path === tab || path.startsWith(`${tab}/`)));
-  return matched ?? '/';
-}
 
 export default function WebViewScreen() {
   const theme = useTheme();
@@ -53,6 +48,7 @@ export default function WebViewScreen() {
     showSplash,
     splashOpacity,
     setCanHideSplash,
+    webViewLoaded,
     setWebViewLoaded,
     markSplashReady,
   } = useSplashTransition();
@@ -81,16 +77,18 @@ export default function WebViewScreen() {
   });
 
   const { handleMessage } = useWebViewMessageDispatcher({
-    setRouteInfo,
-    setHasOverlay,
-    setCoversNav,
-    setCanHideSplash,
-    setSplashStage,
-    handleLogout,
-    handleNativeLogin,
-    handleImagePickerRequest,
-    handleOpenNativeSettings: () => router.push('/settings'),
-    handleWebMessage,
+    onRouteChange: setRouteInfo,
+    onOverlayChange: (hasOverlay, coversNav) => {
+      setHasOverlay(hasOverlay);
+      setCoversNav(coversNav);
+    },
+    onPageRendered: () => setCanHideSplash(true),
+    onSplashStage: setSplashStage,
+    onLogout: handleLogout,
+    onNativeLogin: handleNativeLogin,
+    onImagePickerRequest: handleImagePickerRequest,
+    onOpenSettings: () => router.push('/settings'),
+    onAuthMessage: handleWebMessage,
   });
 
   useEffect(() => {
@@ -102,6 +100,14 @@ export default function WebViewScreen() {
   useEffect(() => {
     WebViewBridge.setThemeMode(webViewRef, mode);
   }, [mode]);
+
+  // 반응형 --native-bottom 주입
+  // onLoadEnd 클로저의 stale 캡처 문제 방지: bottomInset 또는 webViewLoaded 변경 시 재주입
+  useEffect(() => {
+    if (webViewLoaded) {
+      WebViewBridge.setNativeBottom(webViewRef, bottomInset);
+    }
+  }, [bottomInset, webViewLoaded]);
 
   useKeyboardBridge({ webViewRef, isReady });
 
@@ -145,10 +151,7 @@ export default function WebViewScreen() {
             onMessage={handleMessage}
             onShouldStartLoadWithRequest={handleLoadRequest}
             onNavigationStateChange={handleNavigation}
-            onLoadEnd={() => {
-              setWebViewLoaded(true);
-              WebViewBridge.setNativeBottom(webViewRef, bottomInset);
-            }}
+            onLoadEnd={() => setWebViewLoaded(true)}
             onError={handleWebViewError}
             onHttpError={handleHttpError}
           />

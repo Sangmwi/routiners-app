@@ -1,4 +1,4 @@
-﻿import React, { RefObject, useCallback, useState } from 'react';
+import React, { RefObject, useCallback, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import type { WebView } from 'react-native-webview';
 import ActionSheet, { ActionSheetOption } from '@/components/ui/ActionSheet';
@@ -13,10 +13,61 @@ type ImagePickerRequest = {
 
 type SourceSelection = 'camera' | 'gallery' | 'cancel';
 
+// ============================================================================
+// Module-level launcher — DRY: 카메라/갤러리 공통 로직 단일화
+// ============================================================================
+
+async function launchImageSource(type: 'camera' | 'gallery'): Promise<ImagePickerResult> {
+  const isCamera = type === 'camera';
+
+  const permissionResult = isCamera
+    ? await ImagePicker.requestCameraPermissionsAsync()
+    : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  if (permissionResult.status !== 'granted') {
+    return {
+      success: false,
+      error: isCamera ? '카메라 권한이 필요합니다.' : '갤러리 접근 권한이 필요합니다.',
+    };
+  }
+
+  const options: ImagePicker.ImagePickerOptions = {
+    mediaTypes: ['images'],
+    allowsEditing: false,
+    quality: 0.8,
+    base64: true,
+    exif: false,
+  };
+
+  const result = isCamera
+    ? await ImagePicker.launchCameraAsync(options)
+    : await ImagePicker.launchImageLibraryAsync(options);
+
+  if (result.canceled) return { success: false, cancelled: true };
+
+  const asset = result.assets[0];
+  return {
+    success: true,
+    base64: asset.base64
+      ? `data:${asset.mimeType ?? 'image/jpeg'};base64,${asset.base64}`
+      : undefined,
+    uri: asset.uri,
+    mimeType: asset.mimeType ?? 'image/jpeg',
+    fileName: asset.fileName ?? `${isCamera ? 'photo' : 'image'}_${Date.now()}.jpg`,
+    fileSize: asset.fileSize,
+    width: asset.width,
+    height: asset.height,
+  };
+}
+
+// ============================================================================
+// Hook
+// ============================================================================
+
 export const useImagePicker = (webViewRef: RefObject<WebView | null>) => {
   const theme = useComponentTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
-  const [resolveRef, setResolveRef] = useState<((value: SourceSelection) => void) | null>(null);
+  const resolverRef = useRef<((value: SourceSelection) => void) | null>(null);
 
   const sendResult = useCallback(
     (requestId: string, result: ImagePickerResult) => {
@@ -25,94 +76,18 @@ export const useImagePicker = (webViewRef: RefObject<WebView | null>) => {
     [webViewRef],
   );
 
-  const requestCameraPermission = useCallback(async (): Promise<boolean> => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    return status === 'granted';
-  }, []);
-
-  const requestGalleryPermission = useCallback(async (): Promise<boolean> => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    return status === 'granted';
-  }, []);
-
-  const launchCamera = useCallback(async (): Promise<ImagePickerResult> => {
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) {
-      return { success: false, error: '카메라 권한이 필요합니다.' };
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.8,
-      base64: true,
-      exif: false,
-    });
-
-    if (result.canceled) {
-      return { success: false, cancelled: true };
-    }
-
-    const asset = result.assets[0];
-    return {
-      success: true,
-      base64: asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : undefined,
-      uri: asset.uri,
-      mimeType: asset.mimeType || 'image/jpeg',
-      fileName: asset.fileName || `photo_${Date.now()}.jpg`,
-      fileSize: asset.fileSize,
-      width: asset.width,
-      height: asset.height,
-    };
-  }, [requestCameraPermission]);
-
-  const launchGallery = useCallback(async (): Promise<ImagePickerResult> => {
-    const hasPermission = await requestGalleryPermission();
-    if (!hasPermission) {
-      return { success: false, error: '갤러리 접근 권한이 필요합니다.' };
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.8,
-      base64: true,
-      exif: false,
-    });
-
-    if (result.canceled) {
-      return { success: false, cancelled: true };
-    }
-
-    const asset = result.assets[0];
-    return {
-      success: true,
-      base64: asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : undefined,
-      uri: asset.uri,
-      mimeType: asset.mimeType || 'image/jpeg',
-      fileName: asset.fileName || `image_${Date.now()}.jpg`,
-      fileSize: asset.fileSize,
-      width: asset.width,
-      height: asset.height,
-    };
-  }, [requestGalleryPermission]);
-
   const showSourcePicker = useCallback((): Promise<SourceSelection> => {
     return new Promise((resolve) => {
-      setResolveRef(() => resolve);
+      resolverRef.current = resolve;
       setSheetVisible(true);
     });
   }, []);
 
-  const handleSelect = useCallback(
-    (source: SourceSelection) => {
-      if (!resolveRef) return;
-      setSheetVisible(false);
-      resolveRef(source);
-      setResolveRef(null);
-    },
-    [resolveRef],
-  );
+  const handleSelect = useCallback((source: SourceSelection) => {
+    setSheetVisible(false);
+    resolverRef.current?.(source);
+    resolverRef.current = null;
+  }, []);
 
   const handleImagePickerRequest = useCallback(
     async (request: ImagePickerRequest) => {
@@ -122,9 +97,9 @@ export const useImagePicker = (webViewRef: RefObject<WebView | null>) => {
         let result: ImagePickerResult;
 
         if (source === 'camera') {
-          result = await launchCamera();
+          result = await launchImageSource('camera');
         } else if (source === 'gallery') {
-          result = await launchGallery();
+          result = await launchImageSource('gallery');
         } else {
           const selectedSource = await showSourcePicker();
 
@@ -133,7 +108,7 @@ export const useImagePicker = (webViewRef: RefObject<WebView | null>) => {
             return;
           }
 
-          result = selectedSource === 'camera' ? await launchCamera() : await launchGallery();
+          result = await launchImageSource(selectedSource);
         }
 
         sendResult(requestId, result);
@@ -144,7 +119,7 @@ export const useImagePicker = (webViewRef: RefObject<WebView | null>) => {
         });
       }
     },
-    [launchCamera, launchGallery, showSourcePicker, sendResult],
+    [showSourcePicker, sendResult],
   );
 
   const sheetOptions: ActionSheetOption[] = [

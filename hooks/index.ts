@@ -15,6 +15,8 @@
 
 export { useAuth } from './use-auth';
 export { useAuthHandlers } from './use-auth-handlers';
+export { useSessionSync } from './use-session-sync';
+export { useGoogleSignIn } from './use-google-sign-in';
 
 // ============================================================================
 // WebView Hooks

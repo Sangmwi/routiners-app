@@ -1,29 +1,43 @@
-import { useCallback, type Dispatch, type SetStateAction } from 'react';
+import { useCallback } from 'react';
 import type { WebViewMessageEvent } from 'react-native-webview';
 import { WebToAppMessageSchema } from '@sauhi/shared-contracts';
 import type { SplashStage } from '@/components/splash-screen';
 import type { RouteInfo, WebToAppMessage } from '@/lib/webview';
 
-type ImagePickerRequest = Extract<WebToAppMessage, { type: 'REQUEST_IMAGE_PICKER' }>;
-
-interface UseWebViewMessageDispatcherOptions {
-  setRouteInfo: Dispatch<SetStateAction<RouteInfo>>;
-  setHasOverlay: Dispatch<SetStateAction<boolean>>;
-  setCoversNav: Dispatch<SetStateAction<boolean>>;
-  setCanHideSplash: Dispatch<SetStateAction<boolean>>;
-  setSplashStage: Dispatch<SetStateAction<SplashStage>>;
-  handleLogout: () => void | Promise<void>;
-  handleNativeLogin: () => void | Promise<void>;
-  handleImagePickerRequest: (payload: {
-    requestId: ImagePickerRequest['requestId'];
-    source: ImagePickerRequest['source'];
-  }) => void | Promise<void>;
-  handleOpenNativeSettings: () => void;
-  handleWebMessage: (message: WebToAppMessage) => void;
-}
+// ============================================================================
+// Constants
+// ============================================================================
 
 const STRICT_BRIDGE_VALIDATION =
   process.env.EXPO_PUBLIC_STRICT_BRIDGE_VALIDATION !== 'false';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+type ImagePickerRequest = Extract<WebToAppMessage, { type: 'REQUEST_IMAGE_PICKER' }>;
+
+/**
+ * 의미론적 콜백 API — 소비자의 내부 구현(setState 타입)을 드러내지 않음
+ */
+interface UseWebViewMessageDispatcherOptions {
+  onRouteChange: (info: RouteInfo) => void;
+  onOverlayChange: (hasOverlay: boolean, coversNav: boolean) => void;
+  onPageRendered: () => void;
+  onSplashStage: (stage: SplashStage) => void;
+  onLogout: () => void | Promise<void>;
+  onNativeLogin: () => void | Promise<void>;
+  onImagePickerRequest: (payload: {
+    requestId: ImagePickerRequest['requestId'];
+    source: ImagePickerRequest['source'];
+  }) => void | Promise<void>;
+  onOpenSettings: () => void;
+  onAuthMessage: (message: WebToAppMessage) => void;
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
 
 function getMessageTypeHint(raw: string): string | null {
   try {
@@ -63,17 +77,20 @@ function parseWebMessage(raw: string): WebToAppMessage | null {
   }
 }
 
+// ============================================================================
+// Hook
+// ============================================================================
+
 export function useWebViewMessageDispatcher({
-  setRouteInfo,
-  setHasOverlay,
-  setCoversNav,
-  setCanHideSplash,
-  setSplashStage,
-  handleLogout,
-  handleNativeLogin,
-  handleImagePickerRequest,
-  handleOpenNativeSettings,
-  handleWebMessage,
+  onRouteChange,
+  onOverlayChange,
+  onPageRendered,
+  onSplashStage,
+  onLogout,
+  onNativeLogin,
+  onImagePickerRequest,
+  onOpenSettings,
+  onAuthMessage,
 }: UseWebViewMessageDispatcherOptions) {
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {
@@ -82,52 +99,53 @@ export function useWebViewMessageDispatcher({
 
       switch (message.type) {
         case 'ROUTE_INFO':
-          setRouteInfo(message.payload);
+          onRouteChange(message.payload);
           break;
         case 'OVERLAY_STATE':
-          setHasOverlay(message.payload.hasOverlay);
-          setCoversNav(message.payload.coversNav ?? message.payload.hasOverlay);
+          onOverlayChange(
+            message.payload.hasOverlay,
+            message.payload.coversNav ?? message.payload.hasOverlay,
+          );
           break;
         case 'PAGE_RENDERED':
-          setCanHideSplash(true);
+          onPageRendered();
           break;
         case 'LOGOUT':
-          void handleLogout();
+          void onLogout();
           break;
         case 'REQUEST_LOGIN':
-          void handleNativeLogin();
+          void onNativeLogin();
           break;
         case 'OPEN_NATIVE_SETTINGS':
-          handleOpenNativeSettings();
+          onOpenSettings();
           break;
         case 'REQUEST_IMAGE_PICKER':
-          void handleImagePickerRequest({
+          void onImagePickerRequest({
             requestId: message.requestId,
             source: message.source,
           });
           break;
         case 'REQUEST_SESSION_REFRESH':
-          setSplashStage('SESSION_SYNC');
-          handleWebMessage(message);
+          onSplashStage('SESSION_SYNC');
+          onAuthMessage(message);
           break;
         case 'WEB_READY':
         case 'SESSION_SET':
         case 'SESSION_EXPIRED':
-          handleWebMessage(message);
+          onAuthMessage(message);
           break;
       }
     },
     [
-      handleImagePickerRequest,
-      handleLogout,
-      handleNativeLogin,
-      handleOpenNativeSettings,
-      handleWebMessage,
-      setCanHideSplash,
-      setCoversNav,
-      setHasOverlay,
-      setRouteInfo,
-      setSplashStage,
+      onRouteChange,
+      onOverlayChange,
+      onPageRendered,
+      onSplashStage,
+      onLogout,
+      onNativeLogin,
+      onImagePickerRequest,
+      onOpenSettings,
+      onAuthMessage,
     ],
   );
 

@@ -3,15 +3,31 @@ import { Animated } from 'react-native';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import type { SplashStage } from '@/components/splash-screen';
 
+// ============================================================================
+// Constants
+// ============================================================================
+
+const SPLASH_FADE_DURATION_MS = 300;
+const SPLASH_FADE_DELAY_MS = 50;
+
+// ============================================================================
+// Types
+// ============================================================================
+
 interface UseSplashTransitionReturn {
   splashStage: SplashStage;
   setSplashStage: Dispatch<SetStateAction<SplashStage>>;
   showSplash: boolean;
   splashOpacity: Animated.Value;
   setCanHideSplash: Dispatch<SetStateAction<boolean>>;
+  webViewLoaded: boolean;
   setWebViewLoaded: Dispatch<SetStateAction<boolean>>;
   markSplashReady: () => void;
 }
+
+// ============================================================================
+// Hook
+// ============================================================================
 
 export function useSplashTransition(): UseSplashTransitionReturn {
   const [splashStage, setSplashStage] = useState<SplashStage>('SESSION_CHECK');
@@ -32,10 +48,10 @@ export function useSplashTransition(): UseSplashTransitionReturn {
     const timer = setTimeout(() => {
       Animated.timing(splashOpacity, {
         toValue: 0,
-        duration: 300,
+        duration: SPLASH_FADE_DURATION_MS,
         useNativeDriver: true,
       }).start(() => setShowSplash(false));
-    }, 50);
+    }, SPLASH_FADE_DELAY_MS);
 
     return () => clearTimeout(timer);
   }, [canHideSplash, splashOpacity, webViewLoaded]);
@@ -46,6 +62,7 @@ export function useSplashTransition(): UseSplashTransitionReturn {
     showSplash,
     splashOpacity,
     setCanHideSplash,
+    webViewLoaded,
     setWebViewLoaded,
     markSplashReady: () => setSplashReady(true),
   };
