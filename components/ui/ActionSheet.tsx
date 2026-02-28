@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS } from '@sauhi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 import { pretendard } from '@/lib/typography';
 import BaseSheetModal from './BaseSheetModal';

@@ -1,4 +1,4 @@
-import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS } from '@sauhi/shared-contracts';
 import { useThemePreference } from '@/lib/theme-preference';
 
 // ============================================================================

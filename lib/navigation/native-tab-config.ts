@@ -1,5 +1,5 @@
 ﻿import type { ComponentType } from 'react';
-import type { TabRoute } from '@sangmwi/shared-contracts';
+import type { TabRoute } from '@sauhi/shared-contracts';
 import { AppIcons } from '@/lib/icon';
 
 type IconProps = {

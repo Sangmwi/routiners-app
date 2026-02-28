@@ -1,6 +1,6 @@
 ﻿import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS } from '@sauhi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 
 interface AppSurfaceProps {

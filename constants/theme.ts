@@ -4,7 +4,7 @@
  */
 
 import { Platform } from 'react-native';
-import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS } from '@sauhi/shared-contracts';
 
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';

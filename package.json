@@ -11,7 +11,7 @@
     "ios:clean": "expo prebuild --clean --platform ios && expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "sync:webview-types": "echo \"Deprecated: webview contracts are sourced from @sangmwi/shared-contracts\""
+    "sync:webview-types": "echo \"Deprecated: webview contracts are sourced from @sauhi/shared-contracts\""
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -20,7 +20,7 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
-    "@sangmwi/shared-contracts": "file:../routiners-shared-contracts/sangmwi-shared-contracts-0.4.0.tgz",
+    "@sauhi/shared-contracts": "^0.4.0",
     "@supabase/supabase-js": "^2.89.0",
     "expo": "~54.0.33",
     "expo-blur": "^15.0.8",

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { TabRoute } from '@sangmwi/shared-contracts';
+import type { TabRoute } from '@sauhi/shared-contracts';
 import { NATIVE_TAB_ITEMS, NATIVE_TAB_STYLE } from '@/lib/navigation/native-tab-config';
 import { useTheme } from '@/lib/theme';
 

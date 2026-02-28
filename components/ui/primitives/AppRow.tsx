@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS } from '@sauhi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 import { AppIcons } from '@/lib/icon';
 import { pretendard } from '@/lib/typography';

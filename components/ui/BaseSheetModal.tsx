@@ -12,7 +12,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { THEME_TOKENS } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS } from '@sauhi/shared-contracts';
 import { useComponentTheme } from '@/lib/theme';
 
 type ModalPresentation = 'sheet' | 'dialog';

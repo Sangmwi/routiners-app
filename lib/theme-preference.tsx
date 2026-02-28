@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { useColorScheme } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import type { ThemeMode } from '@sangmwi/shared-contracts';
+import type { ThemeMode } from '@sauhi/shared-contracts';
 
 const THEME_MODE_KEY = 'routiners_theme_mode';
 

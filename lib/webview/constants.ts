@@ -4,7 +4,7 @@ import {
   LOGIN_ROUTE_INFO,
   TAB_ROUTES,
   type TabRoute,
-} from '@sangmwi/shared-contracts';
+} from '@sauhi/shared-contracts';
 
 export { DEFAULT_ROUTE_INFO, LOGIN_ROUTE_INFO, TAB_ROUTES, type TabRoute };
 

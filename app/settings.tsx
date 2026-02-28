@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState, type ComponentType, type ReactNode } fr
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { THEME_TOKENS, type ThemeMode } from '@sangmwi/shared-contracts';
+import { THEME_TOKENS, type ThemeMode } from '@sauhi/shared-contracts';
 import { ConfirmDialog, AppRow, AppSection } from '@/components/ui';
 import { AppIcons } from '@/lib/icon';
 import { supabase } from '@/lib/supabase/client';

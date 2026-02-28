@@ -4,4 +4,4 @@ export type {
   ImagePickerResult,
   AppToWebMessage,
   WebToAppMessage,
-} from '@sangmwi/shared-contracts';
+} from '@sauhi/shared-contracts';

@@ -1,6 +1,6 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import type { WebViewMessageEvent } from 'react-native-webview';
-import { WebToAppMessageSchema } from '@sangmwi/shared-contracts';
+import { WebToAppMessageSchema } from '@sauhi/shared-contracts';
 import type { SplashStage } from '@/components/splash-screen';
 import type { RouteInfo, WebToAppMessage } from '@/lib/webview';
 

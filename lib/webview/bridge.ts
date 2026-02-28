@@ -1,6 +1,6 @@
 import { WebView } from 'react-native-webview';
 import type { AppToWebMessage } from './types';
-import type { ThemeMode } from '@sangmwi/shared-contracts';
+import type { ThemeMode } from '@sauhi/shared-contracts';
 
 // ============================================================================
 // Bridge Utilities
